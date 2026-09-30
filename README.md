@@ -1,35 +1,29 @@
-# Indra Kumar — academic portfolio
+# Indra Kumar — research and engineering portfolio
 
-A complete static portfolio prepared for `sincerelyindra.github.io`, with an About page, a project index, seven project detail pages, and a printable résumé. The design follows the simple academic layout of the supplied reference. No build or package installation is needed to publish the site.
+Static portfolio for https://sincerelyindra.github.io/, with a research introduction, professional experience, seven project studies, and a printable web résumé. The site uses HTML, CSS, and a small JavaScript file; no build step or third-party frontend dependency is required.
 
-## Preview
+## Content
 
-Open `index.html` in a browser. All pages, styles, scripts, and the profile avatar are included and use relative paths. The résumé has a **Print / Save as PDF** button and a dedicated print layout.
+- `index.html`: introduction, research interests, selected studies, and concise experience at OLA, the Transportation Networks Laboratory at IISc, and Photomath.
+- `resume.html`: full professional experience, academic background, project summaries, and skills. Use **Print / Save as PDF** for the print layout.
+- `projects.html` and `projects/`: the seven academic project studies, with team attribution, experimental results, limitations, and supporting repository links.
+- `assets/style.css`: shared typography, responsive layouts, and print styles.
+- `assets/site.js`: mobile navigation and the résumé print action.
 
-## Publish with GitHub Pages
+## Preview and deployment
 
-1. Create a public repository named `sincerelyindra.github.io` under the `sincerelyindra` account. Initialize it with a README if you are using the GitHub web interface.
-2. Upload the contents of this folder to the repository root, preserving the `assets/` and `projects/` folders. Keep `.nojekyll` at the root. Do not upload the enclosing folder itself.
-3. In the repository, open **Settings → Pages**.
-4. Under **Build and deployment**, select **Deploy from a branch**, then choose **main** and **/(root)**. Save.
-5. Wait for the Pages deployment to complete. The intended address is `https://sincerelyindra.github.io/`.
+Open `index.html` locally, or serve the repository with a local static server. GitHub Pages publishes the `main` branch from the repository root. `.nojekyll` keeps the files as a plain static site.
 
-GitHub documentation: https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site
+## Updating the portfolio
 
-## Update your details
+Keep dates and role descriptions consistent between the homepage and résumé. Shared navigation appears on every HTML page; update relative links in project detail pages when changing navigation. The current `assets/profile.png` is the GitHub avatar and can be replaced with a preferred portrait.
 
-- Edit `index.html` for your introduction, interests, and featured work.
-- Edit `resume.html` for education, experience, skills, and the printable résumé.
-- Edit `projects.html` for the project index, and the matching file in `projects/` for a project's detail page.
-- Replace `assets/profile.png` with a preferred portrait. The current image is your GitHub avatar. Keep the filename, or update the image paths in the HTML files.
-- Shared design lives in `assets/style.css`. Mobile navigation and the print action live in `assets/site.js`.
+The layout keeps research questions, methods, evaluation, and professional contributions visible without requiring interactive graphics. All content and navigation remain available without JavaScript. Motion is limited to short color transitions and respects reduced-motion preferences.
 
-## Content notes for the owner
+## Source and attribution
 
-Content is based on the seven project submissions and the OLA résumé excerpt supplied in the conversation. Exact degree titles, education dates, CGPA, earlier education, awards, and certifications were not supplied and have not been invented. Add them when confirmed.
+Professional experience is based on the supplied September 2026 résumé image. The homepage summarizes that source; the web résumé retains fuller methods and evaluation detail. It distinguishes the current OLA role from the completed IISc research period.
 
-The medical-imaging project explicitly credits Indra Kumar with the 3D approach. Other project summaries preserve team attribution. Numerical results describe the reported experimental settings. The Open Day activity is described at the project level because individual organizing responsibilities were not specified.
+Project studies retain the existing report-based results and team attribution. Repository links identify supporting material; earlier report-linked repositories remain available where supplied. Numerical results describe their reported experimental settings, and the medical-imaging study explicitly credits Indra Kumar with the 3D approach.
 
-Original project PDFs and slides are not included in the published site. Student identification numbers and collaborators' contact details are not reproduced. Project repository links come from the supplied reports.
-
-The résumé is an editable web résumé assembled from the available facts, not a copy of an existing CV. The site is written independently and does not reuse the reference site's source or personal content.
+No publications, awards, completed degrees, education dates, CGPA, hiring availability, or unsupported outcome metrics have been added. The M.Tech thesis wording reflects the supplied experience entry. Original project submissions, student identification numbers, and collaborators’ contact details are not published.
