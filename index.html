@@ -10,7 +10,8 @@
   <meta property="og:type" content="website">
   <link rel="canonical" href="https://sincerelyindra.github.io/">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%228%22 fill=%22%23174d47%22/%3E%3Ctext x=%2232%22 y=%2243%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2233%22 font-weight=%22700%22 fill=%22white%22%3EIK%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="assets/style.css"><script src="assets/site.js" defer></script>
+  <link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/research-map.css">
+  <script src="assets/site.js" defer></script><script src="assets/research-map.js" defer></script>
 </head>
 <body class="home">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -87,6 +88,38 @@
     <div class="section-heading home-heading">
       <div><p class="eyebrow">Selected work</p><h2 id="work-title">Research projects</h2></div>
       <a href="projects.html">All seven projects →</a>
+    </div>
+    <div class="research-map" id="research-map" aria-labelledby="research-map-title" hidden>
+      <div class="research-map-visual">
+        <div class="research-map-toolbar">
+          <span id="research-map-title">Research connections</span>
+          <button type="button" data-rotation-control>Pause rotation</button>
+        </div>
+        <canvas id="constellationCanvas" width="720" height="440"
+          role="img" aria-label="Rotating 3D map of research themes. Use the adjacent research-area buttons to explore related projects."
+          aria-describedby="research-map-hint"></canvas>
+        <p class="research-map-hint" id="research-map-hint">Drag to rotate · select a research area</p>
+      </div>
+      <div class="research-map-panel">
+        <p class="eyebrow">Explore by research area</p>
+        <div class="research-map-selection" aria-live="polite" aria-atomic="true">
+          <h3 id="constellationTheme">Reinforcement Learning</h3>
+          <p id="constellationDescription">Learning policies for constrained sequential decisions, from EV routing to strategic bidding.</p>
+        </div>
+        <div id="constellationProjects" class="research-map-projects">
+          <a href="projects/electric-vehicle-routing.html">Electric-vehicle routing + V2G</a>
+          <a href="projects/strategic-auction-bidding.html">Strategic bidding agents</a>
+        </div>
+        <div class="research-map-controls" role="group" aria-label="Choose a research area">
+          <button type="button" data-theme="Machine Learning" aria-pressed="false">ML</button>
+          <button type="button" data-theme="Computer Vision" aria-pressed="false">Vision</button>
+          <button type="button" data-theme="Reinforcement Learning" aria-pressed="true">RL</button>
+          <button type="button" data-theme="Optimization" aria-pressed="false">Optimization</button>
+          <button type="button" data-theme="Robotics" aria-pressed="false">Robotics</button>
+          <button type="button" data-theme="Game Theory" aria-pressed="false">Game theory</button>
+          <button type="button" data-theme="RAG &amp; LLMs" aria-pressed="false">RAG / LLMs</button>
+        </div>
+      </div>
     </div>
     <div class="featured-grid">
       <article class="featured-card">

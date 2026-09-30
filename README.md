@@ -18,7 +18,7 @@ Open `index.html` locally, or serve the repository with a local static server. G
 
 Keep dates and role descriptions consistent between the homepage and résumé. Shared navigation appears on every HTML page; update relative links in project detail pages when changing navigation. The current `assets/profile.png` is the GitHub avatar and can be replaced with a preferred portrait.
 
-The layout keeps research questions, methods, evaluation, and professional contributions visible without requiring interactive graphics. All content and navigation remain available without JavaScript. Motion is limited to short color transitions and respects reduced-motion preferences.
+The About page’s Research projects section includes the rotating research map in `assets/research-map.js` and `assets/research-map.css`. It supports dragging, theme selection, and pause/resume; rotation pauses offscreen and starts paused for reduced-motion preferences. These assets load only on the About page. The underlying project studies, experience, and navigation remain available without JavaScript.
 
 ## Source and attribution
 
