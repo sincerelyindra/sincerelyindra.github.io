@@ -34,7 +34,7 @@
 .study-toc a[aria-current] { font-weight: 650; }
 .toc-note { font-size: .66rem; line-height: 1.6; color: var(--study-muted); border-top: 1px solid var(--line); padding-top: 18px; margin-top: 21px; }
 .study-article { min-width: 0; }
-.study-section { scroll-margin-top: 102px; padding: 0 0 45px; margin-bottom: 42px; border-bottom: 1px solid var(--line); }
+.study-section { scroll-margin-top: 12px; padding: 0 0 45px; margin-bottom: 42px; border-bottom: 1px solid var(--line); }
 .study-section:last-child { margin-bottom: 0; border: 0; }
 .study-section-heading { display: flex; align-items: baseline; gap: 17px; margin-bottom: 20px; }
 .section-number { font-size: .75rem; font-family: ui-monospace, monospace; color: #758c7d; }
