@@ -263,6 +263,9 @@ a { overflow-wrap: anywhere; }
   transition:opacity .18s ease,visibility .18s ease;
 }
 .featured-card.preview-active .project-card-preview{
+  pointer-events:auto;
+}
+.featured-card.preview-active .project-card-preview{
   opacity:1;
   visibility:visible;
 }
@@ -292,10 +295,12 @@ a { overflow-wrap: anywhere; }
   transform:scale(var(--project-preview-scale,.4));
   transform-origin:top left;
   opacity:0;
+  pointer-events:auto;
 }
 .project-card-preview.is-loaded .project-card-preview-frame{opacity:1}
 .project-card-preview-badge{
   position:absolute;
+  pointer-events:none;
   z-index:3;
   right:9px;
   bottom:9px;
