@@ -1,33 +1,348 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light"><meta name="theme-color" content="#174d47">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#174d47">
   <title>Brain-tumor segmentation with LoRA and vision transformers | Indra Kumar</title>
-  <meta name="description" content="Adapting vision transformers to multimodal MRI segmentation, with a focus on efficient 3D learning. My contribution was the 3D Swin-UNETR pipeline and the comparison of volume-resizing and centre-patch strategies.">
-  <meta property="og:title" content="Brain-tumor segmentation with LoRA and vision transformers | Indra Kumar">
-  <meta property="og:description" content="Adapting vision transformers to multimodal MRI segmentation, with a focus on efficient 3D learning. My contribution was the 3D Swin-UNETR pipeline and the comparison of volume-resizing and centre-patch strategies.">
-  <meta property="og:type" content="website">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22%23174d47%22/%3E%3Ctext x=%2232%22 y=%2243%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2233%22 font-weight=%22700%22 fill=%22white%22%3EIK%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="../assets/style.css"><script src="../assets/site.js" defer></script>
+  <meta name="description" content="A report-grounded study of LoRA-adapted ViT-Small and 3D Swin-UNETR on BraTS 2021. Methods, original explanatory diagrams, exact Dice results, and experimental scope.">
+  <meta property="og:title" content="Brain-tumor segmentation with LoRA and vision transformers">
+  <meta property="og:description" content="Multimodal MRI segmentation with parameter-efficient transformer adaptation. A detailed research study by Indra Kumar and Vanshika Jindal.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://sincerelyindra.github.io/projects/medical-image-segmentation.html">
+  <link rel="canonical" href="https://sincerelyindra.github.io/projects/medical-image-segmentation.html">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%228%22 fill=%22%23174d47%22/%3E%3Ctext x=%2232%22 y=%2243%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2233%22 font-weight=%22700%22 fill=%22white%22%3EIK%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/brain-lora.css">
+  <script src="../assets/site.js" defer></script>
+  <script src="../assets/brain-lora.js" defer></script>
 </head>
-<body>
+<body class="brain-study">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="masthead"><div class="masthead-inner"><a class="site-name" href="../index.html">Indra Kumar</a><button class="menu-toggle" aria-controls="main-navigation" aria-expanded="false" type="button">Menu</button><nav class="main-nav" id="main-navigation" aria-label="Main navigation"><a href="../index.html">About</a><a href="../projects.html" aria-current="page">Research</a><a href="../index.html#experience">Experience</a><a href="../resume.html">Résumé</a></nav></div></header>
-<div class="page-shell">
-<aside class="profile" aria-label="Profile">
-  <img class="profile-avatar" src="../assets/profile.png" alt="Indra Kumar’s GitHub avatar" width="166" height="166">
-  <p class="profile-name">Indra Kumar</p><p class="profile-description">Machine learning, optimization, and robotics</p><p class="profile-affiliation">OLA · Product Development &amp; R&amp;D</p>
-  <ul class="profile-links">
-    <li class="location-row"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Bengaluru, India</span></li>
-    <li class="institution-row"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 9-5 9 5H3Zm0 13h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><span>Previous research: IISc<br>RBCCPS</span></li>
-    <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 6 9 7 9-7"/></svg><a href="mailto:indrak@iisc.ac.in">Email</a></li>
-    <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5-6 7 6 7m8-14 6 7-6 7m-3-16-2 18"/></svg><a href="https://github.com/sincerelyindra" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-    <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v18h17M8 16l4-6 4 3 5-8"/></svg><a href="https://www.kaggle.com/indrakumar180122" target="_blank" rel="noopener noreferrer">Kaggle</a></li>
-  </ul>
-</aside>
-<main id="main" class="content"><a class="back-link" href="../projects.html">All projects</a><p class="eyebrow">Medical imaging · Parameter-efficient learning</p><h1 class="project-detail-title">Brain-tumor segmentation with LoRA and vision transformers</h1><p class="project-team">Indra Kumar and Vanshika Jindal</p><div class="project-links project-resources"><a href="https://github.com/sincerelyindra/lora-vit-medical-modalities" target="_blank" rel="noopener noreferrer">Project repository ↗</a></div><p>This project explores low-rank adaptation (LoRA) for brain-tumor segmentation on the BraTS 2021 dataset. The MRI inputs include FLAIR, T1, T1CE, and T2, with predictions for whole tumor, tumor core, and enhancing tumor.</p><div class="callout"><p>I developed the 3D-view approach. Vanshika Jindal developed the 2D-view approach.</p></div><section class="details-section"><h2>Approach</h2><ul><li>Adapted a Swin-UNETR backbone with LoRA adapters while freezing the original transformer weights.</li><li>Compared resized whole volumes with 64 × 64 × 64 tumor-centred patches.</li><li>Used five-fold cross-validation, mixed-precision training, gradient checkpointing, and a hybrid Dice and binary cross-entropy loss.</li></ul></section><section class="details-section"><h2>Results</h2><p>The centre-patch strategy achieved a mean Dice score of 0.8572 across the three tumor regions, compared with 0.8484 for whole-volume resizing.</p><div class="data-table-wrap"><table class="data-table"><caption class="note" style="text-align:left;padding-bottom:12px">Results reported in the project experiments</caption><thead><tr><th scope="col">3D strategy</th><th scope="col">Whole tumor Dice</th><th scope="col">Tumor core Dice</th><th scope="col">Enhancing tumor Dice</th></tr></thead><tbody><tr><td>Whole-volume resize</td><td>0.9013</td><td>0.8481</td><td>0.7959</td></tr><tr><td>Centre patch</td><td>0.8965</td><td>0.8365</td><td>0.8385</td></tr></tbody></table></div></section><section class="details-section"><h2>Experimental scope</h2><p>The centre-patch experiments use ground-truth tumor masks to locate patches. These results evaluate segmentation in that experimental setting and do not establish an end-to-end clinical deployment.</p></section><p class="project-meta">Project report: <em>LoRA Implementation on ViT for Multiple Medical Modalities</em></p></main>
-</div>
-<footer class="footer"><div class="footer-inner"><p>© 2026 Indra Kumar</p><p><a href="../projects.html">Research</a> · <a href="../index.html#experience">Experience</a> · <a href="../resume.html">Résumé</a> · <a href="mailto:indrak@iisc.ac.in">Contact</a></p></div></footer>
-</body></html>
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="site-name" href="../index.html">Indra Kumar</a>
+    <button class="menu-toggle" aria-controls="main-navigation" aria-expanded="false" type="button">Menu</button>
+    <nav class="main-nav" id="main-navigation" aria-label="Main navigation">
+      <a href="../index.html">About</a><a href="../projects.html" aria-current="page">Research</a>
+      <a href="../index.html#experience">Experience</a><a href="../resume.html">Résumé</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <div class="study-hero">
+    <a class="study-back" href="../projects.html">← All research projects</a>
+    <div class="study-hero-grid">
+      <div>
+        <p class="eyebrow">Medical imaging · Parameter-efficient learning</p>
+        <h1>Brain-tumor segmentation with LoRA and vision transformers</h1>
+        <p class="study-deck">Exploring the balance between spatial context, local detail, and efficient adaptation in multimodal MRI segmentation.</p>
+        <div class="study-resource-links">
+          <a class="button" href="https://github.com/sincerelyindra/lora-vit-medical-modalities/blob/main/ReportMLSP_Vanshika_Indra.pdf" target="_blank" rel="noopener noreferrer">Read project report ↗</a>
+          <a href="https://github.com/sincerelyindra/lora-vit-medical-modalities" target="_blank" rel="noopener noreferrer">Supporting repository ↗</a>
+          <a href="#results">Explore results ↓</a>
+        </div>
+      </div>
+      <aside class="study-authors" aria-label="Authors and contributions">
+        <p class="eyebrow">Authors &amp; contributions</p>
+        <p><strong>Indra Kumar</strong><span>3D-view approach</span></p>
+        <p><strong>Vanshika Jindal</strong><span>2D-view approach</span></p>
+        <p class="study-small">Attribution follows the report’s individual-responsibility statement. <a class="citation" href="#ref-report" aria-label="Reference 1, project report">[1, §6]</a></p>
+      </aside>
+    </div>
+    <dl class="study-highlights">
+      <div><dt>Best reported 3D mean Dice</dt><dd>0.8572</dd><dd class="highlight-context">Tumor-centered 64³ patches</dd></div>
+      <div><dt>Best reported whole-tumor Dice</dt><dd>0.9013</dd><dd class="highlight-context">Whole-volume resizing</dd></div>
+      <div><dt>Reported 2D trainable parameters</dt><dd>0.672–0.819<span>M</span></dd><dd class="highlight-context">ViT-Small variants; total backbone size differs</dd></div>
+    </dl>
+    <p class="study-provenance">Results and experimental settings are from the project report. Diagram geometry is schematic; no patient scans or model predictions are depicted. <a class="citation" href="#ref-report">[1]</a></p>
+  </div>
 
+  <div class="study-reading-layout">
+    <aside class="study-toc" aria-label="On this page">
+      <p>On this page</p>
+      <nav aria-label="Study sections">
+        <a href="#question"><span>01</span> Research question</a>
+        <a href="#task"><span>02</span> Inputs &amp; targets</a>
+        <a href="#adaptation"><span>03</span> LoRA adaptation</a>
+        <a href="#methods"><span>04</span> Experimental pipelines</a>
+        <a href="#evaluation"><span>05</span> Training &amp; evaluation</a>
+        <a href="#results"><span>06</span> Results</a>
+        <a href="#discussion"><span>07</span> Interpretation &amp; scope</a>
+        <a href="#references"><span>08</span> References</a>
+      </nav>
+    </aside>
+    <article class="study-article">
+      <section class="study-section" id="question" aria-labelledby="question-title">
+        <p class="study-section-number">01 / Research question</p>
+        <h2 id="question-title">How much adaptation is enough?</h2>
+        <p class="study-lead">Can low-rank adaptation support brain-tumor segmentation while limiting the number of transformer parameters updated during training?</p>
+        <p>The study investigates LoRA-equipped vision transformers on BraTS 2021. Three 2D ViT-Small variants explore architecture, loss weighting, and hardware choices. Two 3D Swin-UNETR pipelines compare the retention of whole-brain context with detailed, tumor-centered inputs. <a class="citation" href="#ref-report">[1, §§1–3]</a></p>
+        <p>The report’s strongest 3D average comes from center patches. Whole-volume resizing leads on whole-tumor and tumor-core Dice, while center patches lead on enhancing-tumor Dice. The comparison exposes a useful spatial-context versus local-detail tradeoff within the reported setting.</p>
+      </section>
+
+      <section class="study-section" id="task" aria-labelledby="task-title">
+        <p class="study-section-number">02 / Inputs &amp; targets</p>
+        <h2 id="task-title">Four MRI sequences. Three nested targets.</h2>
+        <p>Each case supplies <strong>FLAIR, T1, T1CE, and T2</strong> MRI volumes and an expert segmentation mask. The four sequences form the input channels; the task predicts whole tumor (WT), tumor core (TC), and enhancing tumor (ET). <a class="citation" href="#ref-report">[1, §4.1.1]</a></p>
+        <ul class="study-modalities" aria-label="Input MRI sequences">
+          <li><strong>FLAIR</strong><span>Fluid-attenuated inversion recovery</span></li>
+          <li><strong>T1</strong><span>Native T1-weighted</span></li>
+          <li><strong>T1CE</strong><span>Contrast-enhanced T1-weighted</span></li>
+          <li><strong>T2</strong><span>T2-weighted</span></li>
+        </ul>
+        <figure class="study-figure">
+          <div class="figure-heading"><span class="figure-number">Figure 1</span><h3>One annotation, three binary masks</h3></div>
+          <div class="target-panels">
+            <div class="target-panel">
+              <svg viewBox="0 0 230 190" role="img" aria-labelledby="wt-title wt-desc">
+                <title id="wt-title">Whole-tumor binary target</title><desc id="wt-desc">The complete outer region is selected, including the tumor core and enhancing component.</desc>
+                <path class="mask-context" d="M44 71C36 32 69 18 100 31C124 14 169 25 178 60C207 85 189 136 158 151C132 172 84 164 60 142C34 131 27 96 44 71Z"/>
+                <path class="mask-wt" d="M44 71C36 32 69 18 100 31C124 14 169 25 178 60C207 85 189 136 158 151C132 172 84 164 60 142C34 131 27 96 44 71Z"/>
+                <path class="mask-boundary" d="M81 69C77 43 114 41 137 53C166 58 173 95 156 114C140 137 105 139 83 119C64 109 65 83 81 69Z"/>
+                <path class="mask-boundary" d="M110 76C119 64 137 66 142 80C152 95 138 111 123 105C107 108 98 88 110 76Z"/>
+              </svg>
+              <h4><span class="region-dot wt-dot"></span>Whole tumor <span>WT</span></h4><p>Labels 1 + 2 + 4</p>
+            </div>
+            <div class="target-panel">
+              <svg viewBox="0 0 230 190" role="img" aria-labelledby="tc-title tc-desc">
+                <title id="tc-title">Tumor-core binary target</title><desc id="tc-desc">The inner core is selected, including enhancing tumor; the outer edematous region is excluded.</desc>
+                <path class="mask-context" d="M44 71C36 32 69 18 100 31C124 14 169 25 178 60C207 85 189 136 158 151C132 172 84 164 60 142C34 131 27 96 44 71Z"/>
+                <path class="mask-tc" d="M81 69C77 43 114 41 137 53C166 58 173 95 156 114C140 137 105 139 83 119C64 109 65 83 81 69Z"/>
+                <path class="mask-boundary" d="M110 76C119 64 137 66 142 80C152 95 138 111 123 105C107 108 98 88 110 76Z"/>
+              </svg>
+              <h4><span class="region-dot tc-dot"></span>Tumor core <span>TC</span></h4><p>Labels 1 + 4</p>
+            </div>
+            <div class="target-panel">
+              <svg viewBox="0 0 230 190" role="img" aria-labelledby="et-title et-desc">
+                <title id="et-title">Enhancing-tumor binary target</title><desc id="et-desc">Only the enhancing component inside the core is selected.</desc>
+                <path class="mask-context" d="M44 71C36 32 69 18 100 31C124 14 169 25 178 60C207 85 189 136 158 151C132 172 84 164 60 142C34 131 27 96 44 71Z"/>
+                <path class="mask-core-context" d="M81 69C77 43 114 41 137 53C166 58 173 95 156 114C140 137 105 139 83 119C64 109 65 83 81 69Z"/>
+                <path class="mask-et" d="M110 76C119 64 137 66 142 80C152 95 138 111 123 105C107 108 98 88 110 76Z"/>
+              </svg>
+              <h4><span class="region-dot et-dot"></span>Enhancing tumor <span>ET</span></h4><p>Label 4</p>
+            </div>
+          </div>
+          <div class="figure-equation" aria-label="Enhancing tumor is a subset of tumor core, which is a subset of whole tumor">ET ⊆ TC ⊆ WT</div>
+          <figcaption>Three masks of the same schematic region. BraTS labels distinguish necrotic core (1), edematous/invaded tissue (2), and enhancing tumor (4). These nested targets are not mutually exclusive classes. Label definitions follow the official dataset documentation. <a class="citation" href="#ref-brats">[2]</a></figcaption>
+        </figure>
+      </section>
+
+      <section class="study-section" id="adaptation" aria-labelledby="adaptation-title">
+        <p class="study-section-number">03 / LoRA adaptation</p>
+        <h2 id="adaptation-title">A frozen backbone, a learned low-rank update.</h2>
+        <p>LoRA keeps a pretrained weight matrix <var>W</var><sub>0</sub> fixed and learns an update through two smaller matrices, <var>A</var> and <var>B</var>. The rank <var>r</var> controls the update’s capacity; <var>α</var>/<var>r</var> scales its contribution. <a class="citation" href="#ref-lora">[3]</a></p>
+        <figure class="study-figure lora-figure">
+          <div class="figure-heading"><span class="figure-number">Figure 2</span><h3>Inside an adapted linear layer</h3></div>
+          <div class="diagram-scroll" tabindex="0" role="region" aria-label="LoRA diagram; horizontally scrollable on small screens">
+            <svg class="lora-diagram" viewBox="0 0 820 275" role="img" aria-labelledby="lora-title lora-desc">
+              <title id="lora-title">LoRA forward pass with frozen and trainable branches</title>
+              <desc id="lora-desc">Input x branches to the frozen pretrained matrix W zero and to trainable matrices A then B. The low-rank branch is scaled by alpha over r and added to the frozen branch to obtain y.</desc>
+              <defs><marker id="lora-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="#73857b"/></marker><marker id="lora-train-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="#174d47"/></marker></defs>
+              <g class="diagram-flow"><path d="M49 129H91V59H210" marker-end="url(#lora-arrow)"/><path d="M442 59H681V111" marker-end="url(#lora-arrow)"/><path d="M699 129H778" marker-end="url(#lora-arrow)"/></g>
+              <g class="diagram-flow train-flow"><path d="M91 129V198H160" marker-end="url(#lora-train-arrow)"/><path d="M279 198H340" marker-end="url(#lora-train-arrow)"/><path d="M459 198H514" marker-end="url(#lora-train-arrow)"/><path d="M605 198H681V148" marker-end="url(#lora-train-arrow)"/></g>
+              <circle cx="35" cy="129" r="15" fill="#fff" stroke="#73857b"/><text x="35" y="135" text-anchor="middle" class="diagram-math">x</text>
+              <circle cx="91" cy="129" r="3" fill="#73857b"/>
+              <rect x="210" y="29" width="232" height="60" rx="5" class="frozen-box"/><text x="326" y="53" text-anchor="middle" class="diagram-label">W₀ · pretrained</text><text x="326" y="74" text-anchor="middle" class="diagram-sub">Frozen during adaptation</text>
+              <rect x="160" y="167" width="119" height="61" rx="5" class="train-box"/><text x="219.5" y="191" text-anchor="middle" class="diagram-label">A</text><text x="219.5" y="212" text-anchor="middle" class="diagram-sub">r × dᵢₙ</text>
+              <rect x="340" y="167" width="119" height="61" rx="5" class="train-box"/><text x="399.5" y="191" text-anchor="middle" class="diagram-label">B</text><text x="399.5" y="212" text-anchor="middle" class="diagram-sub">dₒᵤₜ × r</text>
+              <rect x="514" y="173" width="91" height="49" rx="5" class="train-box"/><text x="559.5" y="204" text-anchor="middle" class="diagram-math">α / r</text>
+              <text x="310" y="257" text-anchor="middle" class="diagram-sub">Trainable low-rank branch</text>
+              <circle cx="681" cy="129" r="18" fill="#fff" stroke="#73857b"/><text x="681" y="136" text-anchor="middle" class="diagram-math">+</text><text x="793" y="135" text-anchor="middle" class="diagram-math">y</text>
+            </svg>
+          </div>
+          <div class="figure-equation" aria-label="y equals W zero x plus alpha over r times B A x">y = W₀x + (α/r)BAx</div>
+          <figcaption>Conceptual LoRA mechanism from Hu et al.; dimensions are symbolic. <a class="citation" href="#ref-lora">[3]</a> In the project, adapters target QKV modules in the 2D models and QKV plus projection layers in 3D. <a class="citation" href="#ref-report">[1, §4.1.3]</a></figcaption>
+        </figure>
+        <p class="study-note">Parameter efficiency concerns the weights updated during training. The frozen backbone is still part of the model, so the reported trainable counts do not establish the total deployed model size.</p>
+      </section>
+
+      <section class="study-section" id="methods" aria-labelledby="methods-title">
+        <p class="study-section-number">04 / Experimental pipelines</p>
+        <h2 id="methods-title">Two views of the same segmentation task.</h2>
+        <p>The study first examines 2D slices, then extends to 3D volumetric inputs. The volumetric branch is my documented contribution; the slice-based branch is Vanshika Jindal’s. <a class="citation" href="#ref-report">[1, §§3, 6]</a></p>
+
+        <div class="method-subheading"><span class="method-label">3D / Swin-UNETR</span><h3>Local detail or whole-brain context?</h3></div>
+        <p>The 3D backbone receives four MRI channels and produces three segmentation channels. Swin-UNETR combines a hierarchical Swin transformer encoder with a convolutional decoder and skip connections. <a class="citation" href="#ref-swin">[4]</a> The project uses feature size 24 and inserts LoRA with <strong>r = 8, α = 32, dropout = 0.1</strong>, freezing the original transformer weights. <a class="citation" href="#ref-report">[1, §4.1.3]</a></p>
+        <div class="preprocessing-strip"><strong>Volume preparation</strong><p>NIfTI loading → channel-first layout → common RAS orientation → 1 mm isotropic spacing → intensity scaling → PyTorch tensors. Training augmentations include flips, 90° rotations, intensity changes, Gaussian noise, and contrast adjustments. <a class="citation" href="#ref-report">[1, §4.1.2]</a></p></div>
+        <figure class="study-figure">
+          <div class="figure-heading"><span class="figure-number">Figure 3</span><h3>Two routes to a 64 × 64 × 64 input</h3></div>
+          <div class="strategy-panels">
+            <div class="strategy-panel">
+              <h4><span>01</span> Center patch</h4>
+              <p>Ground-truth mask → tumor bounding-box center → fixed cubic crop.</p>
+              <svg viewBox="0 0 400 220" role="img" aria-labelledby="crop-title crop-desc">
+                <title id="crop-title">Tumor-centered crop from a larger MRI volume</title><desc id="crop-desc">A highlighted local region of the source volume is extracted as a 64 cubed patch. The center is selected using the ground-truth segmentation mask.</desc>
+                <defs><marker id="crop-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="#174d47"/></marker><pattern id="crop-grid" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M18 0H0V18" fill="none" stroke="#d5e2db" stroke-width=".8"/></pattern></defs>
+                <path d="M23 72L48 47H155L130 72Z" class="volume-top"/><path d="M130 72L155 47V155L130 180Z" class="volume-side"/><rect x="23" y="72" width="107" height="108" class="volume-front"/><rect x="23" y="72" width="107" height="108" fill="url(#crop-grid)"/>
+                <path d="M70 112C56 114 53 138 68 146C84 157 100 141 94 126C92 112 79 105 70 112Z" class="schematic-lesion"/><rect x="50" y="102" width="58" height="58" fill="none" stroke="#174d47" stroke-width="2" stroke-dasharray="5 3"/>
+                <path d="M167 123H226" fill="none" stroke="#174d47" stroke-width="2" marker-end="url(#crop-arrow)"/><text x="195" y="102" text-anchor="middle" class="diagram-sub">Crop</text>
+                <path d="M249 72L274 47H381L356 72Z" class="volume-top"/><path d="M356 72L381 47V155L356 180Z" class="volume-side"/><rect x="249" y="72" width="107" height="108" class="patch-front"/><rect x="249" y="72" width="107" height="108" fill="url(#crop-grid)"/>
+                <path d="M285 100C267 103 270 145 291 150C320 166 337 130 322 109C315 96 298 93 285 100Z" class="schematic-lesion"/>
+                <text x="76" y="205" text-anchor="middle" class="diagram-sub">Source volume</text><text x="305" y="205" text-anchor="middle" class="diagram-label">64³ local patch</text>
+              </svg>
+              <p class="strategy-tradeoff"><strong>Retains:</strong> local spatial detail.<br><strong>Reduces:</strong> distant anatomical context.</p>
+            </div>
+            <div class="strategy-panel">
+              <h4><span>02</span> Whole-volume resize</h4>
+              <p>Entire brain volume → fixed 64³ grid, retaining full anatomical coverage.</p>
+              <svg viewBox="0 0 400 220" role="img" aria-labelledby="resize-title resize-desc">
+                <title id="resize-title">Whole MRI volume downsampled into a fixed grid</title><desc id="resize-desc">The entire source volume is resampled to 64 cubed. A coarser grid illustrates reduced spatial detail while retaining full anatomical coverage.</desc>
+                <defs><marker id="resize-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="#3d586e"/></marker><pattern id="resize-fine-grid" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M18 0H0V18" fill="none" stroke="#d5e2db" stroke-width=".8"/></pattern><pattern id="resize-coarse-grid" width="27" height="27" patternUnits="userSpaceOnUse"><path d="M27 0H0V27" fill="none" stroke="#c7d5df" stroke-width="1"/></pattern></defs>
+                <path d="M23 72L48 47H155L130 72Z" class="volume-top"/><path d="M130 72L155 47V155L130 180Z" class="volume-side"/><rect x="23" y="72" width="107" height="108" class="volume-front"/><rect x="23" y="72" width="107" height="108" fill="url(#resize-fine-grid)"/><path d="M70 112C56 114 53 138 68 146C84 157 100 141 94 126C92 112 79 105 70 112Z" class="schematic-lesion"/>
+                <path d="M167 123H226" fill="none" stroke="#3d586e" stroke-width="2" marker-end="url(#resize-arrow)"/><text x="195" y="102" text-anchor="middle" class="diagram-sub">Resize</text>
+                <path d="M249 72L274 47H381L356 72Z" class="resize-top"/><path d="M356 72L381 47V155L356 180Z" class="resize-side"/><rect x="249" y="72" width="107" height="108" class="resize-front"/><path d="M296 116H314V134H323V143H296V134H287V125H296Z" class="schematic-lesion"/><rect x="249" y="72" width="107" height="108" fill="url(#resize-coarse-grid)"/>
+                <text x="76" y="205" text-anchor="middle" class="diagram-sub">Source volume</text><text x="305" y="205" text-anchor="middle" class="diagram-label">64³ whole volume</text>
+              </svg>
+              <p class="strategy-tradeoff"><strong>Retains:</strong> whole-brain context.<br><strong>Reduces:</strong> fine spatial detail.</p>
+            </div>
+          </div>
+          <div class="shared-backbone"><span>Either strategy, evaluated separately</span><strong>Swin-UNETR + LoRA → WT / TC / ET</strong></div>
+          <figcaption>Schematic comparison of the reported input strategies. The grid and orange region illustrate sampling and a region of interest, not actual voxel counts or experimental predictions. MRI resizing uses trilinear interpolation; mask resizing uses nearest neighbor. <a class="citation" href="#ref-report">[1, §3.2]</a></figcaption>
+        </figure>
+        <div class="study-callout"><strong>Patch localization is part of the experimental setting.</strong><p>The report uses ground-truth masks to center patches. These scores describe segmentation with an annotated tumor location available; a localization procedure for unseen scans is not specified. <a class="citation" href="#ref-report">[1, §3.2]</a></p></div>
+        <p class="tensor-note">For either 3D strategy: input <code>[B, 4, 64, 64, 64]</code> → target <code>[B, 3, 64, 64, 64]</code>. The reported batch size is 1.</p>
+
+        <div class="method-subheading"><span class="method-label">2D / ViT-Small</span><h3>Three slice-based configurations.</h3></div>
+        <p>Slice preprocessing includes Otsu-based brain-region isolation, nonzero-range intensity normalization, histogram equalization, binary target conversion, and retention of slices with significant tumor presence. Prepared data are compressed into <code>.npz</code> files and split for training, validation, and testing. <a class="citation" href="#ref-report">[1, §4.1.2]</a></p>
+        <figure class="study-figure variant-figure">
+          <div class="figure-heading"><span class="figure-number">Figure 4</span><h3>From an MRI slice to segmentation masks</h3></div>
+          <div class="study-controls enhancement-only" role="group" aria-label="Select a reported 2D configuration">
+            <button type="button" data-variant="1" aria-pressed="true">Approach 1</button><button type="button" data-variant="2" aria-pressed="false">Approach 2</button><button type="button" data-variant="3" aria-pressed="false">Approach 3</button>
+          </div>
+          <ol class="slice-pipeline" aria-label="2D processing stages">
+            <li><span>Input</span><strong>4 MRI channels</strong><small>One 2D slice</small></li>
+            <li><span>Front end</span><strong id="variant-front">3-layer CNN</strong><small id="variant-projection">4 → 32 → 3 channels</small></li>
+            <li class="pipeline-encoder"><span>Encoder</span><strong>ViT-Small + LoRA</strong><small id="variant-lora">QKV · r = 16, α = 32</small></li>
+            <li><span>Decoder</span><strong id="variant-decoder">3 upsampling stages</strong><small id="variant-alignment">Transposed convolutions</small></li>
+            <li><span>Output</span><strong>WT / TC / ET</strong><small>3 segmentation masks</small></li>
+          </ol>
+          <p id="variant-description" class="variant-description" aria-live="polite">Approach 1: GPU, batch size 4, class-weighted Dice + BCE, ReduceLROnPlateau, and approximately 819K trainable parameters.</p>
+          <figcaption>High-level pipeline reconstructed from the report’s architecture descriptions. The three projected input channels are intermediate encoder inputs. The exact decoder alignment operations in Approach 3 are not detailed in the report. <a class="citation" href="#ref-report">[1, §4.1.3]</a></figcaption>
+        </figure>
+        <div class="study-table-scroll" tabindex="0" role="region" aria-label="2D model settings; horizontally scrollable">
+          <table class="study-table config-table">
+            <caption>Reported 2D configurations <a class="citation" href="#ref-report">[1, §4.1.3]</a></caption>
+            <thead><tr><th scope="col">Setting</th><th scope="col">Approach 1</th><th scope="col">Approach 2</th><th scope="col">Approach 3</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Front end / decoder</th><td>3-layer CNN / 3 stages</td><td>1×1 convolution / 2 stages</td><td>1×1 convolution / 2 stages + alignment correction</td></tr>
+              <tr><th scope="row">LoRA (r, α)</th><td>(16, 32)</td><td>(16, 32)</td><td>(8, 16)</td></tr>
+              <tr><th scope="row">Hardware / batch</th><td>GPU / 4</td><td>CPU / 2</td><td>GPU / 4</td></tr>
+              <tr><th scope="row">Class weights (WT, TC, ET)</th><td>(1, 2, 3)</td><td>Unweighted</td><td>Unweighted</td></tr>
+              <tr><th scope="row">Schedule</th><td>ReduceLROnPlateau</td><td>Cosine annealing</td><td>Cosine annealing + early stopping</td></tr>
+              <tr><th scope="row">Reported epoch schedule</th><td>50</td><td>50</td><td>50, with early stopping</td></tr>
+              <tr><th scope="row">Reported trainable parameters</th><td>0.819M</td><td>0.672M</td><td>0.672M</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="study-note">Approach 3 additionally uses pinned memory and four data-loading workers. Counts are reproduced at the report’s precision; the equal 0.672M totals for Approaches 2 and 3 do not give an adapter-by-adapter parameter breakdown.</p>
+      </section>
+
+      <section class="study-section" id="evaluation" aria-labelledby="evaluation-title">
+        <p class="study-section-number">05 / Training &amp; evaluation</p>
+        <h2 id="evaluation-title">Overlap and voxel-wise supervision.</h2>
+        <p>All configurations use a hybrid Dice and binary cross-entropy (BCE) loss. Dice encourages region overlap; BCE supplies pixel- or voxel-wise supervision. The first 2D variant additionally weights WT, TC, and ET by 1, 2, and 3. <a class="citation" href="#ref-report">[1, §§4.1.3–4.2]</a></p>
+        <div class="equation-pair">
+          <div><span>2D objective</span><p>ℒ = 0.7 ℒ<sub>Dice</sub> + 0.3 ℒ<sub>BCE</sub></p></div>
+          <div><span>3D objective</span><p>ℒ = 0.5 ℒ<sub>Dice</sub> + 0.5 ℒ<sub>BCE</sub></p></div>
+        </div>
+        <div class="training-grid">
+          <div><h3>3D training protocol</h3><ul><li>Five-fold cross-validation</li><li>AdamW and cosine annealing</li><li>Up to 10 epochs per fold</li><li>Early-stopping patience: 5</li><li>Batch size: 1</li><li>AMP + GradScaler; gradient checkpointing</li></ul></div>
+          <div><h3>Dice similarity coefficient</h3><div class="dice-equation" aria-label="Dice equals twice the size of the intersection of prediction and ground truth, divided by the sum of their sizes"><span>Dice =</span><span class="fraction"><span>2 |P ∩ G|</span><span>|P| + |G|</span></span></div><p><var>P</var> is the predicted binary mask and <var>G</var> the ground truth. A value of 1 indicates perfect overlap. Dice is an overlap score, rather than a percentage of correctly classified voxels.</p></div>
+        </div>
+        <p class="study-note">The report’s 3D learning-rate, weight-decay, and minimum-learning-rate expressions have missing exponents. Their intended numerical values are therefore left unspecified here. Patient counts, detailed fold partitions, and fold-level variability are also not supplied. <a class="citation" href="#ref-report">[1, §§4.1.3–4.2]</a></p>
+      </section>
+
+      <section class="study-section" id="results" aria-labelledby="results-title">
+        <p class="study-section-number">06 / Results</p>
+        <h2 id="results-title">The gains depend on the tumor region.</h2>
+        <p class="study-lead">Whole-volume resizing scores highest on WT and TC. Center patches score highest on ET and the 3D mean.</p>
+        <figure class="study-figure results-figure">
+          <div class="figure-heading"><span class="figure-number">Figure 5</span><h3 id="score-chart-heading">3D strategies · regional Dice</h3></div>
+          <div class="chart-toolbar">
+            <div class="study-controls enhancement-only" role="group" aria-label="Select result family"><button type="button" data-result-family="3d" aria-pressed="true">3D strategies</button><button type="button" data-result-family="2d" aria-pressed="false">2D models</button></div>
+            <div class="chart-legend" id="score-chart-legend"><span><i style="--series-color:#3d586e"></i>Whole-volume resize</span><span><i style="--series-color:#174d47"></i>Center patch</span></div>
+          </div>
+          <div class="diagram-scroll" tabindex="0" role="region" aria-label="Dice score chart; horizontally scrollable on small screens">
+            <svg id="score-chart" class="score-chart" viewBox="0 0 820 380" role="img" aria-labelledby="score-chart-title score-chart-desc">
+              <title id="score-chart-title">3D regional Dice scores on a zero-to-one scale</title>
+              <desc id="score-chart-desc">Whole-volume resize: WT 0.9013, TC 0.8481, ET 0.7959. Center patch: WT 0.8965, TC 0.8365, ET 0.8385. Exact values also appear in Table 1.</desc>
+              <g class="chart-grid"><path d="M130 40V328M277.5 40V328M425 40V328M572.5 40V328M720 40V328"/></g>
+              <g class="chart-axis"><path d="M130 328H720"/><text x="130" y="350">0.00</text><text x="277.5" y="350">0.25</text><text x="425" y="350">0.50</text><text x="572.5" y="350">0.75</text><text x="720" y="350">1.00</text><text x="425" y="374">Dice coefficient</text></g>
+              <g class="chart-region"><text x="109" y="89">WT</text><text x="109" y="177">TC</text><text x="109" y="265">ET</text></g>
+              <g fill="#3d586e"><rect x="130" y="64" width="531.767" height="14" rx="2"/><rect x="130" y="152" width="500.379" height="14" rx="2"/><rect x="130" y="240" width="469.581" height="14" rx="2"/></g>
+              <g fill="#174d47"><rect x="130" y="86" width="528.935" height="14" rx="2"/><rect x="130" y="174" width="493.535" height="14" rx="2"/><rect x="130" y="262" width="494.715" height="14" rx="2"/></g>
+              <g class="chart-value"><text x="671.767" y="76">0.9013</text><text x="668.935" y="98">0.8965</text><text x="640.379" y="164">0.8481</text><text x="633.535" y="186">0.8365</text><text x="609.581" y="252">0.7959</text><text x="634.715" y="274">0.8385</text></g>
+            </svg>
+          </div>
+          <p id="score-chart-insight" class="chart-insight" aria-live="polite">Center patches improve ET Dice by 0.0426, while WT and TC decrease by 0.0048 and 0.0116. The reported mean increases from 0.8484 to 0.8572.</p>
+          <figcaption>Exact regional scores from the report’s Tables 2 and 3. Bars start at zero and share a 0–1 scale. The 2D and 3D configurations use different backbones and protocols; the figure does not isolate a causal effect of dimensionality. <a class="citation" href="#ref-report">[1, §4.3]</a></figcaption>
+        </figure>
+
+        <div class="study-table-scroll" tabindex="0" role="region" aria-label="3D Dice results; horizontally scrollable">
+          <table class="study-table score-table" id="results-3d">
+            <caption>Table 1 · 3D-view results <a class="citation" href="#ref-report">[1, Table 3 &amp; §4.4]</a></caption>
+            <thead><tr><th scope="col">Strategy</th><th scope="col">WT Dice</th><th scope="col">TC Dice</th><th scope="col">ET Dice</th><th scope="col">Mean Dice</th></tr></thead>
+            <tbody><tr><th scope="row">Whole-volume resize</th><td class="best-score">0.9013</td><td class="best-score">0.8481</td><td>0.7959</td><td>0.8484</td></tr><tr><th scope="row">Center patch</th><td>0.8965</td><td>0.8365</td><td class="best-score">0.8385</td><td class="best-score">0.8572</td></tr></tbody>
+          </table>
+        </div>
+        <p class="table-note">Emphasis identifies the higher score in each column. Means are the equally weighted averages of WT, TC, and ET, rounded to four decimals, as reported in §4.4.</p>
+        <div class="study-table-scroll" tabindex="0" role="region" aria-label="2D Dice results; horizontally scrollable">
+          <table class="study-table score-table" id="results-2d">
+            <caption>Table 2 · 2D-slice results <a class="citation" href="#ref-report">[1, Table 2]</a></caption>
+            <thead><tr><th scope="col">Model</th><th scope="col">WT Dice</th><th scope="col">TC Dice</th><th scope="col">ET Dice</th><th scope="col">Trainable parameters</th></tr></thead>
+            <tbody><tr><th scope="row">Approach 1</th><td>0.7784</td><td class="best-score">0.6718</td><td class="best-score">0.6309</td><td>0.819M</td></tr><tr><th scope="row">Approach 2</th><td>0.7812</td><td>0.5526</td><td>0.4199</td><td>0.672M</td></tr><tr><th scope="row">Approach 3</th><td class="best-score">0.8229</td><td>0.6070</td><td>0.5088</td><td>0.672M</td></tr></tbody>
+          </table>
+        </div>
+        <p>The first 2D approach leads on TC and ET; the third leads on WT. The report associates these patterns with class weighting and GPU-oriented optimization, respectively. Multiple settings change together, so these are configuration-level comparisons. <a class="citation" href="#ref-report">[1, §4.4]</a></p>
+        <details class="study-details">
+          <summary>Literature context reported in the project</summary>
+          <p>The report’s prior-work table lists the following scores and parameter counts. It does not establish that these models were rerun under identical data splits or training conditions. The counts are labeled “Params (M)” in that table, without clarifying comparability to the project’s trainable counts.</p>
+          <div class="study-table-scroll" tabindex="0" role="region" aria-label="Reported literature comparison; horizontally scrollable"><table class="study-table score-table"><caption>Context only · values reproduced from report Table 1 <a class="citation" href="#ref-report">[1]</a></caption><thead><tr><th scope="col">Reference model</th><th scope="col">WT Dice</th><th scope="col">TC Dice</th><th scope="col">ET Dice</th><th scope="col">Params (M)</th></tr></thead><tbody><tr><th scope="row">3D U-Net</th><td>0.904</td><td>0.843</td><td>0.785</td><td>30.4</td></tr><tr><th scope="row">nnU-Net</th><td>0.918</td><td>0.881</td><td>0.842</td><td>19.2</td></tr><tr><th scope="row">TransBTS</th><td>0.911</td><td>0.862</td><td>0.802</td><td>121.7</td></tr><tr><th scope="row">HDC-Net</th><td>0.896</td><td>0.851</td><td>0.778</td><td>28.1</td></tr></tbody></table></div>
+          <p class="study-small">The report discusses nnU-Net and TransBTS as background; primary publications are linked for further reading. <a class="citation" href="#ref-nnunet">[5]</a> <a class="citation" href="#ref-transbts">[6]</a> These contextual numbers are not independently re-evaluated here.</p>
+        </details>
+      </section>
+
+      <section class="study-section" id="discussion" aria-labelledby="discussion-title">
+        <p class="study-section-number">07 / Interpretation &amp; scope</p>
+        <h2 id="discussion-title">What the experiments support.</h2>
+        <div class="finding-list">
+          <div><span>01</span><div><h3>Local detail benefits the enhancing region.</h3><p>The center-patch configuration has the highest reported ET Dice, 0.8385, and mean Dice, 0.8572. The report attributes the improvement to better retention of fine lesion detail. This is an interpretation of the observed comparison. <a class="citation" href="#ref-report">[1, §4.4]</a></p></div></div>
+          <div><span>02</span><div><h3>Whole-volume context benefits WT and TC.</h3><p>Resizing achieves WT Dice of 0.9013 and TC Dice of 0.8481. Its lower ET score, 0.7959, is consistent with the report’s concern that resizing can blur smaller structures. <a class="citation" href="#ref-report">[1, §4.4]</a></p></div></div>
+          <div><span>03</span><div><h3>The contribution is adaptation and comparison.</h3><p>The report identifies LoRA integration for medical segmentation and hardware-aware optimization as its contributions. My responsibility was the 3D branch, including the comparison of the two volumetric input strategies. <a class="citation" href="#ref-report">[1, §§5–6]</a></p></div></div>
+        </div>
+        <div class="scope-box">
+          <h3>Reading the results within their scope</h3>
+          <ul>
+            <li><strong>Annotated localization:</strong> center patches rely on ground-truth masks. Full-brain inference without annotations requires a localization strategy.</li>
+            <li><strong>Selected 2D slices:</strong> the report retains slices with significant tumor presence; behavior on tumor-free slices is not characterized.</li>
+            <li><strong>Evaluation detail:</strong> patient-level split procedures, sample counts, fold variability, and confidence intervals are not documented.</li>
+            <li><strong>Efficiency evidence:</strong> 2D trainable counts are reported, but measured runtime, peak memory, inference latency, and 3D parameter totals are absent.</li>
+            <li><strong>Attribution of gains:</strong> there is no matched full-fine-tuning or no-LoRA ablation. The results compare complete configurations.</li>
+          </ul>
+          <p class="study-small">These points distinguish the demonstrated experiments from broader deployment or efficiency claims. The page retains the report’s results without filling in missing measurements.</p>
+        </div>
+      </section>
+
+      <section class="study-section study-references" id="references" aria-labelledby="references-title">
+        <p class="study-section-number">08 / References</p>
+        <h2 id="references-title">Sources &amp; further reading.</h2>
+        <p class="study-small">The project report is the source for methods, settings, attribution, and numerical results. External primary sources explain the dataset and model mechanisms; they supply no additional project measurements.</p>
+        <ol class="reference-list">
+          <li id="ref-report"><span class="reference-tag">Project source</span><p>Indra Kumar and Vanshika Jindal. <a href="https://github.com/sincerelyindra/lora-vit-medical-modalities/blob/main/ReportMLSP_Vanshika_Indra.pdf" target="_blank" rel="noopener noreferrer"><cite>LoRA Implementation on ViT for Multiple Medical Modalities</cite></a>. Four-page project report. <span>§§3–4: pipelines and evaluation; Tables 2–3 and §4.4: results; §6: individual responsibilities.</span></p></li>
+          <li id="ref-brats"><span class="reference-tag">Dataset definitions</span><p>CBICA, University of Pennsylvania. <a href="https://www.med.upenn.edu/cbica/brats2021/" target="_blank" rel="noopener noreferrer"><cite>RSNA–ASNR–MICCAI BraTS Challenge 2021</cite></a>. Official MRI sequence and annotation definitions.</p></li>
+          <li id="ref-lora"><span class="reference-tag">Adaptation mechanism</span><p>Edward J. Hu et al. <a href="https://arxiv.org/abs/2106.09685" target="_blank" rel="noopener noreferrer"><cite>LoRA: Low-Rank Adaptation of Large Language Models</cite></a>. 2021. arXiv:2106.09685.</p></li>
+          <li id="ref-swin"><span class="reference-tag">3D backbone</span><p>Ali Hatamizadeh et al. <a href="https://arxiv.org/abs/2201.01266" target="_blank" rel="noopener noreferrer"><cite>Swin UNETR: Swin Transformers for Semantic Segmentation of Brain Tumors in MRI Images</cite></a>. 2022. arXiv:2201.01266.</p></li>
+          <li id="ref-nnunet"><span class="reference-tag">Prior work</span><p>Fabian Isensee et al. <a href="https://doi.org/10.1038/s41592-020-01008-z" target="_blank" rel="noopener noreferrer"><cite>nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation</cite></a>. <cite>Nature Methods</cite> 18, 203–211 (2021).</p></li>
+          <li id="ref-transbts"><span class="reference-tag">Prior work</span><p>Wenxuan Wang et al. <a href="https://arxiv.org/abs/2103.04430" target="_blank" rel="noopener noreferrer"><cite>TransBTS: Multimodal Brain Tumor Segmentation Using Transformer</cite></a>. 2021. arXiv:2103.04430.</p></li>
+          <li id="ref-visual-reference"><span class="reference-tag">Presentation reference</span><p>Afshine Amidi and Shervine Amidi. <a href="https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks/" target="_blank" rel="noopener noreferrer"><cite>CS 230 — Convolutional Neural Networks Cheatsheet</cite></a>. The compact explanatory format informed this page; all project diagrams were drawn specifically for this study.</p></li>
+        </ol>
+        <a class="study-end-link" href="../projects.html">← Explore the other research projects</a>
+      </section>
+    </article>
+  </div>
+</main>
+<footer class="footer"><div class="footer-inner"><p>© 2026 Indra Kumar</p><p><a href="../projects.html">Research</a> · <a href="../index.html#experience">Experience</a> · <a href="../resume.html">Résumé</a> · <a href="mailto:indrak@iisc.ac.in">Contact</a></p></div></footer>
+</body>
+</html>
