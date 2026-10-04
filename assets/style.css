@@ -64,6 +64,15 @@ a { overflow-wrap: anywhere; }
   color: #1e3029;
   margin-bottom: 21px;
 }
+.hero-role {
+  margin: -7px 0 22px;
+  color: var(--accent);
+  font-size: .86rem;
+  line-height: 1.55;
+  font-weight: 650;
+  letter-spacing: .035em;
+}
+.hero-role span { color: #8a968f; padding: 0 .22em; }
 .hero-statement {
   font-size: clamp(1.2rem, 2vw, 1.65rem);
   line-height: 1.4;
@@ -185,6 +194,7 @@ a { overflow-wrap: anywhere; }
   .main-nav a[aria-current=page]:after { width: 38px; }
   .hero-wrap { padding: 42px 20px 40px; }
   .hero-wrap h1 { font-size: 2.95rem; }
+  .hero-role { font-size: .8rem; margin-bottom: 19px; }
   .hero-statement { font-size: 1.22rem; }
   .desktop-break { display: none; }
   .hero-summary { font-size: .94rem; }
