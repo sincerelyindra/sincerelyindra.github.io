@@ -1,33 +1,372 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light"><meta name="theme-color" content="#174d47">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#174d47">
   <title>Robust pricing with minimal demand information | Indra Kumar</title>
-  <meta name="description" content="An implementation study of quantile-based robust pricing, extended with a historical retail backtest and adaptive confidence intervals. Evaluated across 1,508 rolling windows from 40 store–product pairs.">
+  <meta name="description" content="A research-oriented reproduction and empirical extension of robust quantile pricing under sparse demand information: alpha-regular ambiguity sets, feasibility experiments, a 1,508-window retail backtest, and adaptive confidence intervals.">
   <meta property="og:title" content="Robust pricing with minimal demand information | Indra Kumar">
-  <meta property="og:description" content="An implementation study of quantile-based robust pricing, extended with a historical retail backtest and adaptive confidence intervals. Evaluated across 1,508 rolling windows from 40 store–product pairs.">
-  <meta property="og:type" content="website">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2212%22 fill=%22%23174d47%22/%3E%3Ctext x=%2232%22 y=%2243%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2233%22 font-weight=%22700%22 fill=%22white%22%3EIK%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="../assets/style.css"><script src="../assets/site.js" defer></script>
+  <meta property="og:description" content="From interval-valued demand quantiles to robust prices: structural theory, an executable solver, historical backtesting, and adaptive confidence-interval calibration.">
+  <meta property="og:type" content="article">
+  <link rel="canonical" href="https://sincerelyindra.github.io/projects/robust-pricing.html">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%228%22 fill=%22%23174d47%22/%3E%3Ctext x=%2232%22 y=%2243%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2233%22 font-weight=%22700%22 fill=%22white%22%3EIK%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../assets/style.css?v=20261004">
+  <link rel="stylesheet" href="../assets/robust-pricing.css?v=20261004">
+  <script src="../assets/site.js" defer></script>
+  <script src="../assets/robust-pricing.js?v=20261004" defer></script>
 </head>
-<body>
+<body class="robust-study">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="masthead"><div class="masthead-inner"><a class="site-name" href="../index.html">Indra Kumar</a><button class="menu-toggle" aria-controls="main-navigation" aria-expanded="false" type="button">Menu</button><nav class="main-nav" id="main-navigation" aria-label="Main navigation"><a href="../index.html">About</a><a href="../projects.html" aria-current="page">Research</a><a href="../index.html#experience">Experience</a><a href="../resume.html">Résumé</a></nav></div></header>
-<div class="page-shell">
-<aside class="profile" aria-label="Profile">
-  <img class="profile-avatar" src="../assets/profile.png" alt="Indra Kumar’s GitHub avatar" width="166" height="166">
-  <p class="profile-name">Indra Kumar</p><p class="profile-description">Machine learning, optimization, and robotics</p><p class="profile-affiliation">OLA · Product Development &amp; R&amp;D</p>
-  <ul class="profile-links">
-    <li class="location-row"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Bengaluru, India</span></li>
-    <li class="institution-row"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 9-5 9 5H3Zm0 13h18M5 10v8m5-8v8m4-8v8m5-8v8"/></svg><span>Previous research: IISc<br>RBCCPS</span></li>
-    <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 6 9 7 9-7"/></svg><a href="mailto:indrak@iisc.ac.in">Email</a></li>
-    <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5-6 7 6 7m8-14 6 7-6 7m-3-16-2 18"/></svg><a href="https://github.com/sincerelyindra" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-    <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v18h17M8 16l4-6 4 3 5-8"/></svg><a href="https://www.kaggle.com/indrakumar180122" target="_blank" rel="noopener noreferrer">Kaggle</a></li>
-  </ul>
-</aside>
-<main id="main" class="content"><a class="back-link" href="../projects.html">All projects</a><p class="eyebrow">Game theory · Robust optimization</p><h1 class="project-detail-title">Robust pricing with minimal demand information</h1><p class="project-team">Indra Kumar and Prince Kumar</p><div class="project-links project-resources"><a href="https://github.com/sincerelyindra/robust-quantile-based-pricing" target="_blank" rel="noopener noreferrer">Project repository ↗</a></div><p>We studied pricing when a seller has only sparse and noisy demand observations. The project reproduces the main computational structure of a robust-pricing framework, tests exact versus interval-valued quantiles, and adds an adaptive confidence-interval rule.</p><div class="callout"><p>Team project spanning numerical implementation, reproduction experiments, a rolling historical backtest, and an adaptive interval extension.</p></div><div class="actions"><a class="button button-secondary" href="https://github.com/sincerelyindra/Game_Theory_Project" target="_blank" rel="noopener noreferrer">View code on GitHub</a></div><section class="details-section"><h2>Approach</h2><ul><li>Implemented generalized Pareto interpolation, interval tightening, envelope construction, and numerical robust-price search.</li><li>Backtested Dominick’s canned-tuna scanner data using 26 training weeks, 6 test weeks, and a 4-week rolling step.</li><li>Compared fixed 90%, 95%, and 99% confidence intervals with feasibility-based and validation-based adaptive rules.</li></ul></section><section class="details-section"><h2>Results</h2><p>The robust method led the compared baselines on mean and worst-decile revenue ratios across 1,508 windows. Interval quantiles also maintained feasibility in 99.6–100% of the core feasibility trials.</p><div class="data-table-wrap"><table class="data-table"><caption class="note" style="text-align:left;padding-bottom:12px">Results reported in the project experiments</caption><thead><tr><th scope="col">Historical backtest method</th><th scope="col">Mean revenue ratio</th><th scope="col">Worst-decile ratio</th></tr></thead><tbody><tr><td>Robust pricing</td><td>0.953</td><td>0.807</td></tr><tr><td>Empirical risk minimization</td><td>0.941</td><td>0.747</td></tr><tr><td>Quadratic proxy</td><td>0.939</td><td>0.745</td></tr><tr><td>Linear proxy</td><td>0.939</td><td>0.740</td></tr><tr><td>Logit proxy</td><td>0.939</td><td>0.739</td></tr></tbody></table></div></section><section class="details-section"><h2>Experimental scope</h2><p>Revenue ratios are historical backtest measures, evaluated at the nearest observed future price. The solver uses numerical approximations, the demand inputs include a quantity-based proxy, and the synthetic benchmark produced mixed results.</p></section><p class="project-meta">Project report: <em>Robust Quantile-Based Pricing with Minimal Information: A Reproduction Study, Historical Backtest, and Adaptive Interval Extension</em></p></main>
-</div>
-<footer class="footer"><div class="footer-inner"><p>© 2026 Indra Kumar</p><p><a href="../projects.html">Research</a> · <a href="../index.html#experience">Experience</a> · <a href="../resume.html">Résumé</a> · <a href="mailto:indrak@iisc.ac.in">Contact</a></p></div></footer>
-</body></html>
+<header class="masthead"><div class="masthead-inner">
+  <a class="site-name" href="../index.html">Indra Kumar</a>
+  <button class="menu-toggle" aria-controls="main-navigation" aria-expanded="false" type="button">Menu</button>
+  <nav class="main-nav" id="main-navigation" aria-label="Main navigation">
+    <a href="../index.html">About</a>
+    <a href="../projects.html" aria-current="page">Research</a>
+    <a href="../index.html#experience">Experience</a>
+    <a href="../resume.html">Résumé</a>
+  </nav>
+</div></header>
 
+<main id="main" class="robust-main">
+  <header class="robust-hero">
+    <div>
+      <a class="back-link" href="../projects.html">← All projects</a>
+      <p class="eyebrow">Revenue management / Robust optimization / Reproduction study</p>
+      <h1>Robust pricing with minimal demand information</h1>
+      <p class="robust-deck">How should a seller set one price when the demand curve is largely unknown—and the few observed purchase probabilities are noisy?</p>
+      <p class="robust-intro">This project reproduces the core computational structure of robust quantile pricing under <i>α</i>-regular demand, then pushes it into a historical retail backtest and a feasibility-aware confidence-interval extension. The emphasis is deliberately computational: preserve the source theory where it is implementable, state the numerical approximation where it is not, and test whether the resulting method remains useful outside a clean simulation. <a class="cite" href="#ref-report">[R]</a></p>
+      <p class="robust-byline">Indra Kumar and Prince Kumar</p>
+      <p class="robust-course">Indian Institute of Science · 2026 project study</p>
+      <div class="robust-actions">
+        <a class="button" href="#question">Read the study ↓</a>
+        <a class="text-link" href="https://github.com/sincerelyindra/Game_Theory_Project" target="_blank" rel="noopener noreferrer">Code &amp; experiment artifacts ↗</a>
+        <a class="text-link" href="https://doi.org/10.2139/ssrn.5272309" target="_blank" rel="noopener noreferrer">Source paper ↗</a>
+      </div>
+    </div>
+    <div>
+      <dl class="robust-hero-metrics" aria-label="Headline project results">
+        <div><dt>Rolling test windows</dt><dd>1,508</dd></div>
+        <div><dt>Robust mean revenue ratio</dt><dd>0.953</dd></div>
+        <div><dt>Robust worst decile</dt><dd>0.807</dd></div>
+      </dl>
+      <p class="robust-hero-note">Historical backtest across 40 eligible store–UPC pairs. Ratios compare realized revenue at the method-selected observable test price with the best realized price in that test window. <a class="cite" href="#ref-report">[R:§7.3]</a></p>
+    </div>
+  </header>
+
+  <div class="robust-layout">
+    <nav class="robust-toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+      <ol>
+        <li><a href="#question"><span>01</span> Research question</a></li>
+        <li><a href="#structure"><span>02</span> Robust formulation</a></li>
+        <li><a href="#implementation"><span>03</span> Solver architecture</a></li>
+        <li><a href="#experiments"><span>04</span> Experimental design</a></li>
+        <li><a href="#reproduction"><span>05</span> Reproduction results</a></li>
+        <li><a href="#backtest"><span>06</span> Historical backtest</a></li>
+        <li><a href="#adaptive"><span>07</span> Adaptive intervals</a></li>
+        <li><a href="#scope"><span>08</span> Scope &amp; reproducibility</a></li>
+        <li><a href="#references"><span>09</span> Sources</a></li>
+      </ol>
+      <p class="toc-note">Interactive charts use only values reported in the project write-up. Explanatory diagrams are labelled as structure, not empirical evidence.</p>
+    </nav>
+
+    <article class="robust-article">
+      <section id="question" class="robust-section" aria-labelledby="question-title">
+        <div class="robust-section-heading"><span class="section-number">01</span><h2 id="question-title">The research question</h2></div>
+        <p class="section-lead">Classical pricing assumes a demand curve. Here, the seller sees only a few prices and uncertain purchase probabilities—and must still choose a price with a worst-case guarantee.</p>
+        <p>Let <span class="inline-equation">F̄(p)=1−F(p)</span> be the survival probability that a customer valuation exceeds price <i>p</i>. With market size normalized to one, revenue is <span class="inline-equation">R(p)=pF̄(p)</span>. The difficulty is that <span class="inline-equation">F̄</span> is not observed. Instead, at a small set of prices <span class="inline-equation">w₁,…,w<sub>K</sub></span>, the seller has exact or interval-valued quantile information. The ambiguity set is restricted by <i>α</i>-regularity, which includes classical regularity at <i>α</i>=0 and the monotone-hazard-rate condition at <i>α</i>=1. <a class="cite" href="#ref-report">[R:§3]</a> <a class="cite" href="#ref-ge">[G]</a></p>
+
+        <figure class="research-figure">
+          <div class="figure-topline"><span>Figure 1</span><span>From sparse information to a robust price</span></div>
+          <div class="problem-grid">
+            <div>
+              <span class="step">Observed</span>
+              <h3>Few price anchors</h3>
+              <p>At each observed price, purchase probability is exact or lies inside a confidence interval.</p>
+              <code>wᵢ → [qᵢᴸ, qᵢᴴ]</code>
+            </div>
+            <div>
+              <span class="step">Assumed</span>
+              <h3>Shape, not a parametric family</h3>
+              <p>The unknown valuation distribution belongs to the class of α-regular distributions consistent with all anchors.</p>
+              <code>F ∈ 𝓕α(w,[qᴸ,qᴴ])</code>
+            </div>
+            <div>
+              <span class="step">Chosen</span>
+              <h3>Worst-case robust price</h3>
+              <p>Choose the posted price that protects the largest fraction of clairvoyant monopoly revenue against Nature.</p>
+              <code>maxₚ min_F revenue ratio</code>
+            </div>
+          </div>
+          <figcaption>Conceptual map of the project’s optimization problem. It reflects the report’s formulation; it is not a synthetic data plot. <a class="cite" href="#ref-report">[R:§3]</a></figcaption>
+        </figure>
+
+        <div class="equation-stack">
+          <div class="equation-card">
+            <span class="equation-label">Uncertain quantile observation</span>
+            <div class="equation">F̄(wᵢ) ∈ [qᵢᴸ, qᵢᴴ], &nbsp; i = 1,…,K</div>
+            <p>The interval form acknowledges sampling noise instead of treating a small-sample estimate as exact.</p>
+          </div>
+          <div class="equation-card">
+            <span class="equation-label">Worst-case competitive ratio</span>
+            <div class="equation">CR(p,𝓕α) = inf<sub>F∈𝓕α</sub> &nbsp; pF̄(p) / max<sub>v≥0</sub> vF̄(v)</div>
+            <p>The denominator is the revenue a clairvoyant seller would obtain if the true distribution were known.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="structure" class="robust-section" aria-labelledby="structure-title">
+        <div class="robust-section-heading"><span class="section-number">02</span><h2 id="structure-title">Why the infinite-dimensional problem becomes tractable</h2></div>
+        <p>The key structural idea is geometric. Pointwise-valid confidence intervals may still be mutually incompatible with <i>α</i>-regularity. Generalized Pareto interpolation is used to tighten those raw intervals into globally feasible bounds without changing the ambiguity set. The same interpolation geometry then constructs extremal lower and upper envelopes for the adversarial distribution. <a class="cite" href="#ref-report">[R:§4.1]</a> <a class="cite" href="#ref-ge">[G]</a></p>
+
+        <div class="equation-stack">
+          <div class="equation-card">
+            <span class="equation-label">Generalized Pareto tail</span>
+            <div class="equation">Γ<sub>α</sub>(v) = (1+(1−α)v)<sup>−1/(1−α)</sup> for α&lt;1, &nbsp; and &nbsp; Γ<sub>1</sub>(v)=e<sup>−v</sup></div>
+            <p>This is the coordinate system used by the interpolation and envelope construction.</p>
+          </div>
+          <div class="equation-card">
+            <span class="equation-label">Feasibility test after tightening</span>
+            <div class="equation">𝓕<sub>α</sub> ≠ ∅ &nbsp; ⇔ &nbsp; qᴸ ≤ qᴴ &nbsp; coordinatewise</div>
+            <p>After applying all shape-implied restrictions, feasibility reduces to checking whether each tightened lower bound is below its upper bound.</p>
+          </div>
+          <div class="equation-card">
+            <span class="equation-label">Nature’s reduced problem</span>
+            <div class="equation">inf<sub>F∈𝓕α</sub> CR(p,F) &nbsp; → &nbsp; inf<sub>r≥0</sub> CR(p,F*<sub>r</sub>)</div>
+            <p>The source theory shows that Nature need only choose a scalar monopoly pivot <i>r</i>; the extremal curve is then assembled from the flattest feasible left tail and steepest feasible right tail at the maximal feasible pivot height.</p>
+          </div>
+        </div>
+
+        <div class="alpha-note">
+          <div><strong>α = 0 · regular distributions</strong><p>Recovers the classical Myerson regularity condition through monotonic virtual value.</p></div>
+          <div><strong>α = 1 · MHR</strong><p>Imposes the stronger monotone-hazard-rate structure; the generalized Pareto tail becomes exponential.</p></div>
+        </div>
+      </section>
+
+      <section id="implementation" class="robust-section" aria-labelledby="implementation-title">
+        <div class="robust-section-heading"><span class="section-number">03</span><h2 id="implementation-title">Executable solver architecture</h2></div>
+        <p class="section-lead">The implementation follows the source paper’s objects, but the final reduced adversarial search is solved numerically on dense grids rather than by the appendix-level closed-form cubic routines.</p>
+
+        <figure class="research-figure">
+          <div class="figure-topline"><span>Figure 2</span><span>Report-to-code pipeline</span></div>
+          <div class="solver-flow">
+            <div><span class="flow-id">01</span><h3>Generalized Pareto primitives</h3><p>Evaluate Γ<sub>α</sub>, its inverse, and two-point interpolation.</p><code>gamma_bar · gamma_bar_inv · gbar</code></div>
+            <div><span class="flow-id">02</span><h3>Tighten intervals</h3><p>Intersect raw confidence intervals with shape restrictions induced by compatible anchors.</p><code>_tighten_bounds</code></div>
+            <div><span class="flow-id">03</span><h3>Build upper envelope</h3><p>Construct piecewise feasible upper curves and their switch points.</p><code>_build_upper_pieces</code></div>
+            <div><span class="flow-id">04</span><h3>Search Nature’s pivot</h3><p>Approximate the one-dimensional inner adversarial problem over a dense pivot grid.</p><code>robust_value</code></div>
+            <div><span class="flow-id">05</span><h3>Select seller price</h3><p>Evaluate candidate prices and retain the strongest worst-case guarantee.</p><code>maximin_revenue_price</code></div>
+          </div>
+          <figcaption>Function names match the executable solver described in the report and preserved in the public repository. <a class="cite" href="#ref-report">[R:§5.1]</a> <a class="cite" href="#ref-code">[C]</a></figcaption>
+        </figure>
+
+        <div class="implementation-note">
+          <strong>Important caveat</strong>
+          <p>The project is a faithful reproduction of the framework and a best-effort reproduction of the exact algorithm. The source paper’s appendix-level closed-form <i>O(K²)</i> / cubic-equation subroutines are not reimplemented; dense-grid numerical optimization is used instead. This distinction is central to interpreting the mixed synthetic benchmark. <a class="cite" href="#ref-report">[R:§5.1,§9.2]</a></p>
+        </div>
+      </section>
+
+      <section id="experiments" class="robust-section" aria-labelledby="experiments-title">
+        <div class="robust-section-heading"><span class="section-number">04</span><h2 id="experiments-title">Three experimental tracks</h2></div>
+        <div class="experiment-grid">
+          <article class="experiment-card"><span class="exp-index">Part A · Reproduction</span><h3>Does uncertainty preserve feasibility?</h3><p>Compare exact plug-in quantiles with Wilson intervals on four benchmark distributions; then compare robust pricing with linear, quadratic, and logit proxies under simulated demand.</p></article>
+          <article class="experiment-card"><span class="exp-index">Part B · Historical test</span><h3>Does it survive real pricing history?</h3><p>Run a rolling backtest on canned-tuna scanner data using only past information, and score robust pricing against ERM and three parametric demand proxies.</p></article>
+          <article class="experiment-card"><span class="exp-index">Part C · Extension</span><h3>Can interval width adapt to feasibility?</h3><p>Compare fixed 90%, 95%, and 99% confidence levels with a narrowest-feasible rule and a validation-guided rule across α∈{0,1}.</p></article>
+        </div>
+
+        <figure class="research-figure">
+          <div class="figure-topline"><span>Figure 3</span><span>Historical rolling-window protocol</span></div>
+          <div class="timeline">
+            <div class="train"><strong>26 training weeks</strong><small>fit ERM / parametric proxies / robust ambiguity set</small></div>
+            <div class="test"><strong>6 test weeks</strong><small>evaluate</small></div>
+          </div>
+          <div class="timeline-shift">Advance the window by 4 weeks and repeat. Eligible store–UPC pairs require at least 40 weeks and at least 3 distinct prices.</div>
+          <div class="anchor-row" aria-label="Robust method price anchors">
+            <div><strong>25th percentile</strong><small>training-price anchor</small></div>
+            <div><strong>50th percentile</strong><small>training-price anchor</small></div>
+            <div><strong>75th percentile</strong><small>training-price anchor</small></div>
+          </div>
+          <figcaption>The robust backtest uses three empirical price anchors, normal-theory confidence intervals for a quantity-based purchase-probability proxy, and nearest-observed future-price evaluation. <a class="cite" href="#ref-report">[R:§5.3, App. B.1]</a></figcaption>
+        </figure>
+      </section>
+
+      <section id="reproduction" class="robust-section" aria-labelledby="reproduction-title">
+        <div class="robust-section-heading"><span class="section-number">05</span><h2 id="reproduction-title">Reproduction: feasibility succeeds, synthetic performance is mixed</h2></div>
+        <p>The strongest reproduced result is feasibility under small samples. With <i>n</i>=10 Bernoulli observations at each of three support-relative prices, exact plug-in quantiles frequently violate the global shape restrictions. Wilson intervals remain feasible in essentially every trial. <a class="cite" href="#ref-report">[R:§7.1]</a></p>
+
+        <figure class="research-figure">
+          <div class="figure-topline"><span>Figure 4</span><span id="feasibility-chart-note">Exact vs interval feasibility</span></div>
+          <div class="metric-toggle" role="group" aria-label="Select alpha for feasibility chart">
+            <button type="button" data-feas-alpha="1" aria-pressed="true">α = 1 · MHR</button>
+            <button type="button" data-feas-alpha="0" aria-pressed="false">α = 0 · regular</button>
+          </div>
+          <div class="chart-shell"><svg id="feasibility-chart" role="img" aria-labelledby="feas-title feas-desc" viewBox="0 0 760 320"></svg></div>
+          <figcaption>Feasibility rate from the project reproduction. Interval-valued quantiles achieve 0.996–1.000 feasibility, while exact plug-in estimates fall as low as 0.350. <a class="cite" href="#ref-report">[R:Table 1]</a></figcaption>
+        </figure>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <caption>Exact versus interval quantile feasibility</caption>
+            <thead><tr><th scope="col">Distribution</th><th scope="col">α=1 exact</th><th scope="col">α=1 interval</th><th scope="col">α=0 exact</th><th scope="col">α=0 interval</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Beta(2,2)</th><td>0.620</td><td>1.000</td><td>0.708</td><td>1.000</td></tr>
+              <tr><th scope="row">Uniform(0,1)</th><td>0.350</td><td>0.996</td><td>0.458</td><td>0.996</td></tr>
+              <tr><th scope="row">Chi-squared (k=5)</th><td>0.608</td><td>1.000</td><td>0.658</td><td>1.000</td></tr>
+              <tr><th scope="row">Truncated normal (5,2.5)</th><td>0.674</td><td>1.000</td><td>0.752</td><td>1.000</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Synthetic benchmark: report the failures, not only the wins</h3>
+        <p>The simulated baseline comparison is intentionally presented as a <em>partial</em> reproduction. The robust method performs strongly under the piecewise-exponential misspecification case, ties strong baselines on the simple linear case, but underperforms on the quick-run logit and Pareto cases. The report attributes this mismatch plausibly to the dense-grid solver approximation and lighter computational budget. <a class="cite" href="#ref-report">[R:§7.2, App. A]</a></p>
+        <div class="benchmark-matrix" aria-label="Representative synthetic benchmark cases">
+          <div><span class="case">Linear · 5-grid</span><strong>Ours 1.000</strong><p>Linear 1.000 · Quadratic 1.000 · Logit 0.712</p></div>
+          <div><span class="case">Piecewise-exp. · 10-grid</span><strong>Ours 0.951</strong><p>Linear 0.812 · Quadratic 0.812 · Logit 0.320</p></div>
+          <div><span class="case">Logit · 10-grid</span><strong>Ours 0.103</strong><p>Linear 0.564 · Logit 0.435 · Quadratic 0.467</p></div>
+          <div><span class="case">Pareto · 10-grid</span><strong>Ours 0.123</strong><p>Linear 0.862 · Logit 0.831 · Quadratic 0.998</p></div>
+        </div>
+      </section>
+
+      <section id="backtest" class="robust-section" aria-labelledby="backtest-title-section">
+        <div class="robust-section-heading"><span class="section-number">06</span><h2 id="backtest-title-section">Historical rolling backtest</h2></div>
+        <p class="section-lead">The strongest empirical result in the project is not the clean simulation—it is the noisier historical test.</p>
+        <p>Across 40 eligible store–UPC pairs and 1,508 rolling windows, robust pricing attains the highest mean revenue ratio and the strongest worst-decile performance. The median ratio is 1.000 for every method, so the separation appears mainly in difficult windows rather than easy or tied ones. <a class="cite" href="#ref-report">[R:§7.3]</a></p>
+
+        <figure class="research-figure">
+          <div class="figure-topline"><span>Figure 5</span><span id="backtest-chart-note">Historical method comparison</span></div>
+          <div class="metric-toggle" role="group" aria-label="Select historical backtest metric">
+            <button type="button" data-backtest-metric="mean" aria-pressed="true">Mean ratio</button>
+            <button type="button" data-backtest-metric="worst" aria-pressed="false">Worst-decile ratio</button>
+          </div>
+          <div class="chart-shell"><svg id="backtest-chart" role="img" aria-labelledby="backtest-title backtest-desc" viewBox="0 0 760 310"></svg></div>
+          <figcaption>Every method is evaluated on the same 1,508 windows. The robust method improves the mean ratio by about 1.2 percentage points over ERM and shows a larger lower-tail gain. <a class="cite" href="#ref-report">[R:Table 3]</a></figcaption>
+        </figure>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <caption>Rolling backtest summary</caption>
+            <thead><tr><th scope="col">Method</th><th scope="col">Mean</th><th scope="col">Median</th><th scope="col">Std.</th><th scope="col">Worst decile</th><th scope="col">Windows</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Robust</th><td>0.953</td><td>1.000</td><td>0.136</td><td>0.807</td><td>1,508</td></tr>
+              <tr><th scope="row">ERM</th><td>0.941</td><td>1.000</td><td>0.156</td><td>0.747</td><td>1,508</td></tr>
+              <tr><th scope="row">Quadratic</th><td>0.939</td><td>1.000</td><td>0.159</td><td>0.745</td><td>1,508</td></tr>
+              <tr><th scope="row">Linear</th><td>0.939</td><td>1.000</td><td>0.159</td><td>0.740</td><td>1,508</td></tr>
+              <tr><th scope="row">Logit</th><td>0.939</td><td>1.000</td><td>0.159</td><td>0.739</td><td>1,508</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="result-callout">
+          <div class="result-number">+0.060<small>worst-decile gain vs ERM</small></div>
+          <p>The average improvement is modest but persistent; the tail improvement is larger. That pattern is consistent with the purpose of a robust method: its practical value appears most clearly when the window is hard and model error matters more.</p>
+        </div>
+
+        <div class="protocol-note">
+          <h3>Why evaluation uses the nearest observed future price</h3>
+          <p>Scanner data do not reveal counterfactual demand at prices that were never posted in the test window. Evaluating a recommendation at an unsupported future price would require another demand model and would turn the historical test back into a simulation. The project therefore maps each recommended price to the nearest price actually observed in the six-week test window. <a class="cite" href="#ref-report">[R:§8.2]</a></p>
+        </div>
+      </section>
+
+      <section id="adaptive" class="robust-section" aria-labelledby="adaptive-title-section">
+        <div class="robust-section-heading"><span class="section-number">07</span><h2 id="adaptive-title-section">Extension: adapt confidence intervals to feasibility</h2></div>
+        <p>A fixed 99% interval is safe but often wide; a fixed 90% interval is sharper but may produce an empty ambiguity set. The project’s main extension uses a simple monotonicity fact—widening intervals cannot destroy an already-feasible distribution—to select the narrowest confidence level that preserves feasibility. <a class="cite" href="#ref-report">[R:§5.4,§8.1]</a></p>
+
+        <div class="adaptive-rule" aria-label="AdaptiveFeasible decision rule">
+          <div><strong>Try 90%</strong><small>If the tightened ambiguity set is feasible, stop.</small></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div><strong>Else try 95%</strong><small>Widen only when the narrower interval fails.</small></div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div><strong>Else use 99%</strong><small>The widest candidate acts as the fallback.</small></div>
+        </div>
+
+        <figure class="research-figure">
+          <div class="figure-topline"><span>Figure 6</span><span id="adaptive-chart-note">Interval width versus performance</span></div>
+          <div class="metric-toggle" role="group" aria-label="Select alpha for adaptive confidence interval chart">
+            <button type="button" data-adaptive-alpha="0" aria-pressed="true">α = 0 · regular</button>
+            <button type="button" data-adaptive-alpha="1" aria-pressed="false">α = 1 · MHR</button>
+          </div>
+          <div id="adaptive-summary" class="adaptive-summary" aria-live="polite"></div>
+          <div class="chart-shell"><svg id="adaptive-chart" role="img" aria-labelledby="adaptive-title adaptive-desc" viewBox="0 0 760 390"></svg></div>
+          <figcaption>Trade-off using the project’s method-level averages. Higher mean revenue ratio and narrower average interval width are preferred; point radius tracks feasibility. <a class="cite" href="#ref-report">[R:Tables 4–5]</a></figcaption>
+        </figure>
+
+        <p>For <i>α</i>=0, AdaptiveFeasible reaches mean ratio 0.839 with full feasibility and mean interval width 0.239, versus 0.818 and width 0.372 for fixed 99%. For <i>α</i>=1, both adaptive rules achieve mean ratio 0.847; fixed 99% reaches 0.841. More strongly, the report states that AdaptiveFeasible weakly dominates every fixed confidence level in every (model, <i>n</i>) cell evaluated for both values of <i>α</i>. <a class="cite" href="#ref-report">[R:§7.4]</a></p>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <caption>Adaptive-CI experiment averages, K=3</caption>
+            <thead><tr><th scope="col">α</th><th scope="col">Method</th><th scope="col">Mean ratio</th><th scope="col">Feasibility</th><th scope="col">Mean width</th><th scope="col">Selected CI</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><th scope="row">AdaptiveFeasible</th><td>0.839</td><td>1.000</td><td>0.239</td><td>0.901</td></tr>
+              <tr><td>0</td><th scope="row">AdaptiveValidated</th><td>0.838</td><td>1.000</td><td>0.287</td><td>0.939</td></tr>
+              <tr><td>0</td><th scope="row">Fixed90</th><td>0.833</td><td>0.989</td><td>0.238</td><td>0.900</td></tr>
+              <tr><td>0</td><th scope="row">Fixed95</th><td>0.832</td><td>0.997</td><td>0.285</td><td>0.950</td></tr>
+              <tr><td>0</td><th scope="row">Fixed99</th><td>0.818</td><td>1.000</td><td>0.372</td><td>0.990</td></tr>
+              <tr><td>1</td><th scope="row">AdaptiveFeasible</th><td>0.847</td><td>0.969</td><td>0.245</td><td>0.907</td></tr>
+              <tr><td>1</td><th scope="row">AdaptiveValidated</th><td>0.847</td><td>0.969</td><td>0.293</td><td>0.944</td></tr>
+              <tr><td>1</td><th scope="row">Fixed90</th><td>0.819</td><td>0.911</td><td>0.236</td><td>0.900</td></tr>
+              <tr><td>1</td><th scope="row">Fixed95</th><td>0.823</td><td>0.928</td><td>0.283</td><td>0.950</td></tr>
+              <tr><td>1</td><th scope="row">Fixed99</th><td>0.841</td><td>0.969</td><td>0.370</td><td>0.990</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="scope" class="robust-section" aria-labelledby="scope-title">
+        <div class="robust-section-heading"><span class="section-number">08</span><h2 id="scope-title">What the project establishes—and what it does not</h2></div>
+        <div class="scope-grid">
+          <div>
+            <h3>Supported by the implementation and experiments</h3>
+            <ul>
+              <li>Interval-valued quantiles are dramatically more stable than exact plug-in quantiles under the project’s small-sample feasibility experiment.</li>
+              <li>The executable solver captures generalized Pareto interpolation, interval tightening, envelope construction, and the reduced robust-price search.</li>
+              <li>The robust method leads the compared baselines in the 1,508-window historical backtest, especially in lower-tail performance.</li>
+              <li>Feasibility-aware interval calibration improves or matches fixed confidence-level rules in the reported adaptive-CI study.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Limitations kept explicit</h3>
+            <ul>
+              <li>The solver is a dense-grid approximation, not a theorem-by-theorem implementation of the source paper’s closed-form appendix routines.</li>
+              <li>The synthetic benchmark does not uniformly reproduce the source paper’s headline superiority.</li>
+              <li>The historical dataset does not expose true conversion probabilities; the backtest uses a clipped quantity-based proxy.</li>
+              <li>Nearest-observed-price evaluation is historically defensible but does not measure fully counterfactual revenue at unposted prices.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Reproducibility map</h3>
+        <p>The repository is organized to mirror the write-up, preserving the original top-level scripts while providing report-aligned entry points.</p>
+        <div class="repo-map">
+          <a href="https://github.com/sincerelyindra/Game_Theory_Project/blob/main/scripts/01_reproduce_paper.py" target="_blank" rel="noopener noreferrer"><code>scripts/01_reproduce_paper.py</code><span>ambiguity sets, feasibility study, synthetic benchmark</span></a>
+          <a href="https://github.com/sincerelyindra/Game_Theory_Project/blob/main/scripts/02_rolling_backtest.py" target="_blank" rel="noopener noreferrer"><code>scripts/02_rolling_backtest.py</code><span>scanner-data cleaning, rolling windows, historical evaluation</span></a>
+          <a href="https://github.com/sincerelyindra/Game_Theory_Project/blob/main/scripts/03_adaptive_ci_experiments.py" target="_blank" rel="noopener noreferrer"><code>scripts/03_adaptive_ci_experiments.py</code><span>fixed-CI baselines, AdaptiveFeasible, AdaptiveValidated</span></a>
+          <a href="https://github.com/sincerelyindra/Game_Theory_Project/blob/main/docs/REPORT_ALIGNMENT.md" target="_blank" rel="noopener noreferrer"><code>docs/REPORT_ALIGNMENT.md</code><span>one-to-one mapping between report sections, scripts, data, and result bundles</span></a>
+        </div>
+      </section>
+
+      <section id="references" class="robust-section" aria-labelledby="references-title">
+        <div class="robust-section-heading"><span class="section-number">09</span><h2 id="references-title">Sources &amp; provenance</h2></div>
+        <ol class="reference-list">
+          <li id="ref-report"><span class="reference-id">R</span><div><strong>Kumar, I. &amp; Kumar, P. (2026). <em>Robust Quantile-Based Pricing with Minimal Information: A Reproduction Study, Historical Backtest, and Adaptive Interval Extension.</em></strong><p>Primary project write-up. This page follows its formulation, implementation caveats, tables, backtest protocol, and adaptive-CI results. The public repository contains the aligned code and result bundles.</p><a href="https://github.com/sincerelyindra/Game_Theory_Project" target="_blank" rel="noopener noreferrer">Project repository ↗</a> <a href="https://github.com/sincerelyindra/Game_Theory_Project/blob/main/docs/REPORT_ALIGNMENT.md" target="_blank" rel="noopener noreferrer">Report alignment ↗</a></div></li>
+          <li id="ref-ge"><span class="reference-id">G</span><div><strong>Ge, Y., He, S., Wang, Z. &amp; Wang, Z. (2025). <em>Optimal Robust Pricing with Minimal Information.</em> SSRN Electronic Journal.</strong><p>Source framework reproduced in the project; DOI 10.2139/ssrn.5272309.</p><a href="https://doi.org/10.2139/ssrn.5272309" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></li>
+          <li id="ref-code"><span class="reference-id">C</span><div><strong>Game_Theory_Project · executable study repository.</strong><p>Contains the best-effort robust solver, historical canned-tuna backtest, adaptive confidence-interval experiment, modularized entry points, data pointers, and result archives.</p><a href="https://github.com/sincerelyindra/Game_Theory_Project" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></li>
+        </ol>
+      </section>
+
+      <div class="end-links">
+        <a href="../projects.html">← Research projects</a>
+        <a href="strategic-auction-bidding.html">Next project →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="footer"><div class="footer-inner">
+  <p>© 2026 Indra Kumar</p>
+  <p><a href="../projects.html">Research</a> · <a href="../index.html#experience">Experience</a> · <a href="../resume.html">Résumé</a> · <a href="mailto:indrak@iisc.ac.in">Contact</a></p>
+</div></footer>
+</body>
+</html>
