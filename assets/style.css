@@ -234,10 +234,6 @@ a { overflow-wrap: anywhere; }
 }
 
 
-/* The language-model study spans the selected-project grid. */
-.home .llm-study-card { grid-column: 1 / -1; }
-
-
 /* Homepage research-card in-place previews */
 .featured-card{
   position:relative;
