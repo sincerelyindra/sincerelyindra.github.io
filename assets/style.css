@@ -232,3 +232,7 @@ a { overflow-wrap: anywhere; }
   .role, .organization { margin-bottom: 4px; }
   .button { display: none; }
 }
+
+
+/* The language-model study spans the selected-project grid. */
+.home .llm-study-card { grid-column: 1 / -1; }

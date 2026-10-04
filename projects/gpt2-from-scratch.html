@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#174d47">
+  <title>GPT-2 From Scratch – LLM Systems | Indra Kumar</title>
+  <meta name="description" content="A PyTorch reimplementation of GPT-2 (124M): decoder architecture, causal attention, tied embeddings, checkpoint verification, autoregressive generation, and domain fine-tuning.">
+  <meta property="og:title" content="GPT-2 From Scratch – LLM Systems | Indra Kumar">
+  <meta property="og:description" content="An implementation study of GPT-2, with interactive architecture and causal-mask diagrams, parameter accounting, and carefully attributed technical explanations.">
+  <meta property="og:type" content="article">
+  <link rel="canonical" href="https://sincerelyindra.github.io/projects/gpt2-from-scratch.html">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%228%22 fill=%22%23174d47%22/%3E%3Ctext x=%2232%22 y=%2243%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2233%22 font-weight=%22700%22 fill=%22white%22%3EIK%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/gpt2-study.css">
+  <script src="../assets/site.js" defer></script>
+  <script src="../assets/gpt2-study.js" defer></script>
+</head>
+<body class="gpt-study">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="site-name" href="../index.html">Indra Kumar</a>
+    <button class="menu-toggle" aria-controls="main-navigation" aria-expanded="false" type="button">Menu</button>
+    <nav class="main-nav" id="main-navigation" aria-label="Main navigation">
+      <a href="../index.html">About</a><a href="../projects.html" aria-current="page">Research</a>
+      <a href="../index.html#experience">Experience</a><a href="../resume.html">Résumé</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="study-main">
+  <header class="study-hero">
+    <div class="study-hero-copy">
+      <a class="back-link" href="../projects.html">← All projects</a>
+      <p class="eyebrow">Implementation study <span aria-hidden="true">/</span> <time datetime="2025-06">June 2025</time></p>
+      <h1>GPT-2 From Scratch <span>– LLM Systems</span></h1>
+      <p class="study-deck">Building the decoder. Checking the weights.<br class="desktop-break"> Understanding the language-model pipeline.</p>
+      <p class="study-byline">Indra Kumar · PyTorch · GPT-2 reproduction</p>
+      <div class="study-actions">
+        <a class="button" href="#architecture">Explore the architecture ↓</a>
+        <a class="text-link" href="https://www.youtube.com/watch?v=l8pRSuU81PU" target="_blank" rel="noopener noreferrer">Karpathy’s reference lecture ↗</a>
+      </div>
+    </div>
+    <aside class="model-spec" aria-label="Reference GPT-2 small architecture">
+      <p class="spec-label">GPT-2 small <span>Reference architecture</span></p>
+      <p class="spec-total">124<span>M</span></p>
+      <p class="spec-caption">parameters · decoder-only transformer</p>
+      <dl class="spec-grid">
+        <div><dt>Decoder blocks</dt><dd>12</dd></div>
+        <div><dt>Attention heads / block</dt><dd>12</dd></div>
+        <div><dt>Hidden width</dt><dd>768</dd></div>
+        <div><dt>Context positions</dt><dd>1,024</dd></div>
+        <div><dt>Vocabulary entries</dt><dd>50,257</dd></div>
+      </dl>
+      <p class="spec-footnote">Canonical checkpoint dimensions. <a class="cite" href="#ref-2" aria-label="Reference 2: GPT-2 configuration">[2]</a></p>
+    </aside>
+  </header>
+
+  <div class="study-layout">
+    <nav class="study-toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+      <ol>
+        <li><a href="#overview"><span>01</span> Project scope</a></li>
+        <li><a href="#architecture"><span>02</span> Decoder architecture</a></li>
+        <li><a href="#causal-attention"><span>03</span> Causal attention</a></li>
+        <li><a href="#parameters"><span>04</span> Parameter accounting</a></li>
+        <li><a href="#training"><span>05</span> Training &amp; generation</a></li>
+        <li><a href="#verification"><span>06</span> Checkpoint verification</a></li>
+        <li><a href="#references"><span>07</span> Sources &amp; attribution</a></li>
+      </ol>
+      <p class="toc-note">Diagrams explain the model’s mechanics. They are not experimental measurements.</p>
+    </nav>
+    <article class="study-article">
+      <section id="overview" class="study-section" aria-labelledby="overview-title">
+        <div class="study-section-heading"><span class="section-number">01</span><h2 id="overview-title">Project scope</h2></div>
+        <p class="study-abstract">I reimplemented the 124M-parameter GPT-2 decoder in PyTorch, covering masked multi-head attention, residual connections, layer normalization, and tied embeddings. I loaded the official checkpoint and verified numerical agreement with Hugging Face logits, then built autoregressive generation and domain fine-tuning pipelines using cross-entropy loss, AdamW, learning-rate scheduling, and mixed-precision training. <a class="cite" href="#ref-project" aria-label="Project source">[P]</a></p>
+        <div class="scope-row">
+          <div><h3>Implementation</h3><p>Reconstruct the decoder’s components and tensor flow.</p></div>
+          <div><h3>Verification</h3><p>Compare checkpoint-loaded model logits with a reference implementation.</p></div>
+          <div><h3>Language modelling</h3><p>Support next-token generation and domain fine-tuning.</p></div>
+        </div>
+        <p class="source-note">This project follows Andrej Karpathy’s <em>Let’s reproduce GPT-2 (124M)</em>. The explanations below use the canonical GPT-2 small architecture; project-specific claims come from the supplied June 2025 summary. <a class="cite" href="#ref-1" aria-label="Reference 1: Karpathy lecture and code">[1]</a></p>
+      </section>
+
+      <section id="architecture" class="study-section" aria-labelledby="architecture-title">
+        <div class="study-section-heading"><span class="section-number">02</span><h2 id="architecture-title">Inside the decoder</h2></div>
+        <p>Token and learned position embeddings form the input representation. Twelve decoder blocks transform it; a final layer normalization and vocabulary projection produce a next-token logit vector at each position. The output projection shares its weights with the token embedding table. <a class="cite" href="#ref-2" aria-label="Reference 2: GPT-2 configuration">[2]</a> <a class="cite" href="#ref-3" aria-label="Reference 3: GPT-2 architecture">[3]</a></p>
+        <figure class="study-figure architecture-figure">
+          <div class="figure-topline"><span>Figure 1</span><span>Architecture &amp; tensor flow</span></div>
+          <div class="architecture-grid">
+            <div class="model-flow" aria-label="Model stages from token IDs to logits">
+              <p class="flow-input">Token IDs <code>(B, T)</code></p>
+              <span class="flow-arrow" aria-hidden="true">↓</span>
+              <button type="button" class="arch-stage" data-stage="embeddings" aria-pressed="false" aria-controls="architecture-detail">
+                <span class="stage-label">Token + position embeddings</span><code>(B, T, 768)</code>
+              </button>
+              <span class="flow-arrow" aria-hidden="true">↓</span>
+              <button type="button" class="arch-stage is-selected" data-stage="decoder" aria-pressed="true" aria-controls="architecture-detail">
+                <span class="stage-count">× 12</span><span class="stage-label">Pre-norm decoder block</span><code>(B, T, 768)</code>
+              </button>
+              <span class="flow-arrow" aria-hidden="true">↓</span>
+              <button type="button" class="arch-stage" data-stage="output" aria-pressed="false" aria-controls="architecture-detail">
+                <span class="stage-label">Final norm + tied projection</span><code>(B, T, 50,257)</code>
+              </button>
+              <span class="flow-arrow" aria-hidden="true">↓</span>
+              <p class="flow-output">Next-token logits at every position</p>
+              <p class="interaction-hint enhanced-only">Select a stage to inspect its dimensions.</p>
+            </div>
+            <div id="architecture-detail" class="architecture-detail" aria-live="polite" aria-atomic="true">
+              <p class="detail-kicker" id="stage-kicker">One decoder block</p>
+              <h3 id="stage-title">Two sublayers. Two residual paths.</h3>
+              <div id="decoder-diagram">
+                <svg class="block-diagram" viewBox="0 0 330 354" role="img" aria-labelledby="block-title block-desc">
+                  <title id="block-title">Pre-layer-normalized GPT-2 decoder block</title>
+                  <desc id="block-desc">Input H passes through layer normalization and causal attention, then is added to H through a residual connection to form U. U passes through another layer normalization and an MLP, and is added to U through a second residual connection.</desc>
+                  <defs><marker id="block-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#63756d"/></marker></defs>
+                  <g fill="none" stroke="#63756d" stroke-width="1.4" marker-end="url(#block-arrow)">
+                    <path d="M150 27V43M150 76V89M150 130V148M150 178V202M150 235V249M150 290V306M150 336V349"/>
+                    <path d="M150 31H37V162H132M150 188H37V320H132"/>
+                  </g>
+                  <g class="svg-node"><rect x="70" y="43" width="160" height="33" rx="4"/><rect x="70" y="89" width="160" height="41" rx="4"/><rect x="70" y="202" width="160" height="33" rx="4"/><rect x="70" y="249" width="160" height="41" rx="4"/></g>
+                  <g class="svg-sum"><circle cx="150" cy="163" r="15"/><circle cx="150" cy="321" r="15"/></g>
+                  <g text-anchor="middle" class="svg-label"><text x="150" y="21">H · input</text><text x="150" y="65">LayerNorm</text><text x="150" y="115">Causal self-attention</text><text x="150" y="224">LayerNorm</text><text x="150" y="275">MLP · 768 → 3,072 → 768</text><text x="150" y="168" class="svg-plus">+</text><text x="150" y="326" class="svg-plus">+</text></g>
+                  <g class="svg-side-label"><text x="173" y="168">U</text><text x="173" y="326">H out</text><text x="245" y="65">pre-norm</text><text x="245" y="224">pre-norm</text></g>
+                </svg>
+              </div>
+              <p class="stage-explanation" id="stage-explanation">Normalize before each sublayer. Attention mixes information across permitted positions; the GELU MLP transforms each position independently. Each sublayer adds its result to its input.</p>
+              <p class="stage-equation" id="stage-equation"><code>U = H + Attention(LN(H))<br>H_out = U + MLP(LN(U))</code></p>
+            </div>
+          </div>
+          <figcaption><strong>B</strong> = batch size, <strong>T</strong> = sequence length (up to 1,024). The residual width stays 768 throughout. Schematic based on the reference implementation. <a class="cite" href="#ref-1" aria-label="Reference 1">[1]</a></figcaption>
+        </figure>
+      </section>
+
+      <section id="causal-attention" class="study-section" aria-labelledby="attention-title">
+        <div class="study-section-heading"><span class="section-number">03</span><h2 id="attention-title">Attention without looking ahead</h2></div>
+        <p>The 768 channels split into 12 heads of width 64. Each head projects queries, keys, and values. A query at position <em>i</em> may attend to keys at positions <em>j ≤ i</em>, including itself; future positions are masked before softmax. <a class="cite" href="#ref-4" aria-label="Reference 4: Attention Is All You Need">[4]</a></p>
+        <div class="equation-box">
+          <math xmlns="http://www.w3.org/1998/Math/MathML" display="block" aria-label="Attention equals softmax of Q K transpose divided by the square root of 64, plus the causal mask M, multiplied by V">
+            <mrow><mi mathvariant="normal">Attention</mi><mo>=</mo><mi mathvariant="normal">softmax</mi><mo>(</mo><mfrac><mrow><mi>Q</mi><msup><mi>K</mi><mi>⊤</mi></msup></mrow><msqrt><mn>64</mn></msqrt></mfrac><mo>+</mo><mi>M</mi><mo>)</mo><mi>V</mi></mrow>
+          </math>
+          <p>M<sub>ij</sub> = 0 when j ≤ i; M<sub>ij</sub> = −∞ when j &gt; i.</p>
+        </div>
+        <figure class="study-figure mask-figure">
+          <div class="figure-topline"><span>Figure 2</span><span>Explore the causal mask</span></div>
+          <div class="mask-layout">
+            <div class="mask-table-wrap">
+              <p class="axis-label">Key position j →</p>
+              <table class="causal-mask" aria-label="Six-position causal attention mask. Rows are queries; columns are keys.">
+                <thead><tr><th scope="col">Query i</th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col">6</th></tr></thead>
+                <tbody>
+                  <tr data-query="1"><th scope="row">1</th><td class="allowed" aria-label="Allowed">●</td><td aria-label="Masked">×</td><td aria-label="Masked">×</td><td aria-label="Masked">×</td><td aria-label="Masked">×</td><td aria-label="Masked">×</td></tr>
+                  <tr data-query="2"><th scope="row">2</th><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td aria-label="Masked">×</td><td aria-label="Masked">×</td><td aria-label="Masked">×</td><td aria-label="Masked">×</td></tr>
+                  <tr data-query="3"><th scope="row">3</th><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td aria-label="Masked">×</td><td aria-label="Masked">×</td><td aria-label="Masked">×</td></tr>
+                  <tr data-query="4" class="is-query"><th scope="row">4</th><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td aria-label="Masked">×</td><td aria-label="Masked">×</td></tr>
+                  <tr data-query="5"><th scope="row">5</th><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td aria-label="Masked">×</td></tr>
+                  <tr data-query="6"><th scope="row">6</th><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td><td class="allowed" aria-label="Allowed">●</td></tr>
+                </tbody>
+              </table>
+              <p class="mask-legend"><span><i class="legend-allowed" aria-hidden="true"></i>● Allowed</span><span><i class="legend-masked" aria-hidden="true"></i>× Masked</span></p>
+            </div>
+            <div class="mask-controls">
+              <div class="enhanced-only range-control"><label for="query-position">Inspect query position <output id="query-value" for="query-position">4</output></label><input type="range" min="1" max="6" value="4" step="1" id="query-position"><div class="range-ends" aria-hidden="true"><span>1 · first token</span><span>6 · last token</span></div></div>
+              <div id="mask-explanation" class="mask-explanation" aria-live="polite" aria-atomic="true">
+                <h3 id="mask-query-title">Position 4 can read 1–4.</h3>
+                <p id="mask-readable">Keys 5 and 6 are masked. Their attention probability is zero.</p>
+                <p class="mask-prediction" id="mask-prediction">This position predicts token x₅ from the prefix x₁…x₄.</p>
+              </div>
+              <p class="small-note">This is a binary visibility mask, not a heatmap of learned attention weights. x₁…x₆ represent token positions, not a particular text tokenization.</p>
+            </div>
+          </div>
+          <figcaption>The mask is applied independently in every head and block. During training, all positions can be processed in parallel while preserving the left-to-right dependency.</figcaption>
+        </figure>
+      </section>
+
+      <section id="parameters" class="study-section" aria-labelledby="parameters-title">
+        <div class="study-section-heading"><span class="section-number">04</span><h2 id="parameters-title">Where the 124M parameters live</h2></div>
+        <p>Using the canonical dimensions and counting each shared tensor once gives <strong>124,439,808 unique parameters</strong>. The largest component is the MLP stack. Tying the vocabulary projection to the token embedding avoids a second 50,257 × 768 matrix. <a class="cite" href="#ref-2" aria-label="Reference 2">[2]</a> <a class="cite" href="#ref-1" aria-label="Reference 1">[1]</a></p>
+        <figure class="study-figure budget-figure">
+          <div class="figure-topline"><span>Figure 3</span><span>Derived parameter budget · includes biases</span></div>
+          <div class="budget-head"><p>Unique parameters</p><strong>124,439,808</strong></div>
+          <svg class="budget-chart" viewBox="0 0 1000 34" preserveAspectRatio="none" role="img" aria-labelledby="budget-title budget-desc">
+            <title id="budget-title">GPT-2 small parameter composition</title>
+            <desc id="budget-desc">MLPs: 56,669,184, or 45.54 percent. Token embeddings: 38,597,376, or 31.02 percent. Attention: 28,348,416, or 22.78 percent. Position embeddings: 786,432, or 0.63 percent. Layer normalization: 38,400, or 0.03 percent.</desc>
+            <rect x="0.000000" width="455.394338" height="34" fill="#174d47"/><rect x="455.394338" width="310.169042" height="34" fill="#6d9486"/><rect x="765.563380" width="227.808259" height="34" fill="#b8cdbc"/><rect x="993.371639" width="6.319778" height="34" fill="#b98848"/><rect x="999.691417" width="0.308583" height="34" fill="#596c77"/>
+          </svg>
+          <div class="budget-legend"><span><i style="background:#174d47"></i>MLPs</span><span><i style="background:#6d9486"></i>Token embeddings</span><span><i style="background:#b8cdbc"></i>Attention</span><span><i style="background:#b98848"></i>Positions</span><span><i style="background:#596c77"></i>Layer norms</span></div>
+          <div class="study-table-wrap"><table class="study-table parameter-table">
+            <caption class="sr-only">Parameter counts derived from standard GPT-2 small dimensions</caption>
+            <thead><tr><th scope="col">Component</th><th scope="col">Count</th><th scope="col">Share</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">MLPs, all 12 blocks<small>12 × [(768 × 3,072 + 3,072) + (3,072 × 768 + 768)]</small></th><td>56,669,184</td><td>45.54%</td></tr>
+              <tr><th scope="row">Token embeddings / tied output<small>50,257 × 768 · one shared matrix</small></th><td>38,597,376</td><td>31.02%</td></tr>
+              <tr><th scope="row">Attention projections, all 12 blocks<small>12 × [(768 × 2,304 + 2,304) + (768 × 768 + 768)]</small></th><td>28,348,416</td><td>22.78%</td></tr>
+              <tr><th scope="row">Learned position embeddings<small>1,024 × 768</small></th><td>786,432</td><td>0.63%</td></tr>
+              <tr><th scope="row">Layer normalization<small>(12 × 2 + 1) norms × (768 scale + 768 bias)</small></th><td>38,400</td><td>0.03%</td></tr>
+            </tbody>
+          </table></div>
+          <figcaption>This is an architectural calculation, not a measured training result. The bias-free output head reuses the token embedding weights and adds no unique parameters. The causal mask is not a trainable parameter.</figcaption>
+        </figure>
+      </section>
+
+      <section id="training" class="study-section" aria-labelledby="training-title">
+        <div class="study-section-heading"><span class="section-number">05</span><h2 id="training-title">One objective, two uses</h2></div>
+        <p>A causal language model learns to predict the next token from the available prefix. Domain fine-tuning continues this objective on domain text; generation uses the resulting distribution to append one token at a time. Both pipelines are documented in the project summary. <a class="cite" href="#ref-project" aria-label="Project source">[P]</a> <a class="cite" href="#ref-3" aria-label="Reference 3">[3]</a></p>
+        <figure class="study-figure token-figure">
+          <div class="figure-topline"><span>Figure 4</span><span>Shifted targets &amp; autoregressive decoding</span></div>
+          <div class="shift-example">
+            <div class="token-row"><span class="token-row-label">Input</span><span class="token">x₁</span><span class="token">x₂</span><span class="token">x₃</span><span class="token">x₄</span><span class="token">x₅</span></div>
+            <div class="shift-arrows" aria-hidden="true"><span></span><span>↓</span><span>↓</span><span>↓</span><span>↓</span><span>↓</span></div>
+            <div class="token-row"><span class="token-row-label">Target</span><span class="token target-token">x₂</span><span class="token target-token">x₃</span><span class="token target-token">x₄</span><span class="token target-token">x₅</span><span class="token target-token">x₆</span></div>
+          </div>
+          <p class="shift-note">Each output at position t is supervised by x<sub>t+1</sub>. The causal mask controls which input positions it can use.</p>
+          <div class="equation-box loss-equation">
+            <math xmlns="http://www.w3.org/1998/Math/MathML" display="block" aria-label="Loss is minus one over T times the sum from t equals 1 to T of log probability of token x t plus 1 conditioned on tokens x 1 through t">
+              <mrow><mi>ℒ</mi><mo>=</mo><mo>−</mo><mfrac><mn>1</mn><mi>T</mi></mfrac><munderover><mo>∑</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mi mathvariant="normal">log</mi><msub><mi>p</mi><mi>θ</mi></msub><mo>(</mo><msub><mi>x</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>|</mo><msub><mi>x</mi><mrow><mn>1</mn><mo>:</mo><mi>t</mi></mrow></msub><mo>)</mo></mrow>
+            </math>
+            <p>Mean next-token cross-entropy for one unpadded training sequence.</p>
+          </div>
+          <div class="decoding-demo">
+            <div class="decoding-heading"><h3>At inference, the prefix grows</h3><span class="demo-tag">Symbolic example</span></div>
+            <div class="generation-prefix" id="generation-prefix" aria-label="Current decoding prefix"><span class="token">x₁</span><span class="token">x₂</span><span class="token">x₃</span></div>
+            <p id="generation-status" class="generation-status" aria-live="polite">Use the final position’s logits to predict x₄, then append it to the prefix.</p>
+            <div class="generation-controls enhanced-only"><button type="button" id="generation-step" class="study-button">Append one token →</button><button type="button" id="generation-reset" class="study-button secondary" disabled>Reset</button></div>
+            <p class="small-note">The animation illustrates the decoding loop with token symbols. It does not run GPT-2 or display model-generated text. A real decoder converts final-position logits to probabilities and selects the next token.</p>
+          </div>
+          <figcaption>Training predicts many next-token targets in one pass; generation extends the context sequentially. Token symbols make the alignment explicit without implying actual tokenizer output.</figcaption>
+        </figure>
+        <div class="training-methods">
+          <h3>Documented training components</h3>
+          <dl>
+            <div><dt>Cross-entropy</dt><dd>Compares unnormalized vocabulary logits with next-token target IDs. An extra softmax is not needed before PyTorch’s loss. <a class="cite" href="#ref-5" aria-label="Reference 5: CrossEntropyLoss">[5]</a></dd></div>
+            <div><dt>AdamW</dt><dd>Adaptive optimization with decoupled weight decay. <a class="cite" href="#ref-6" aria-label="Reference 6: AdamW">[6]</a></dd></div>
+            <div><dt>Learning-rate scheduling</dt><dd>Changes the learning rate over training. The project summary does not specify the schedule or its settings.</dd></div>
+            <div><dt>Mixed precision</dt><dd>Uses different floating-point precisions for suitable operations. The chosen dtype and hardware are not specified in the summary. <a class="cite" href="#ref-7" aria-label="Reference 7: automatic mixed precision">[7]</a></dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section id="verification" class="study-section" aria-labelledby="verification-title">
+        <div class="study-section-heading"><span class="section-number">06</span><h2 id="verification-title">Checking the reconstruction</h2></div>
+        <p>Loading a checkpoint tests whether the reconstructed architecture is compatible with the pretrained model. The project summary reports numerical agreement between the custom implementation and Hugging Face logits after loading the official GPT-2 checkpoint. <a class="cite" href="#ref-project" aria-label="Project source">[P]</a></p>
+        <div class="verification-panel">
+          <p class="detail-kicker">Reported verification</p>
+          <h3>Checkpoint-loaded logits agree with the reference.</h3>
+          <p>The summary provides no numerical tolerance, comparison log, or maximum-error value. This page reports the verification claim at that level.</p>
+        </div>
+        <h3 class="subsection-title">Why weight layout matters</h3>
+        <p>In Karpathy’s reference loader, GPT-2’s <code>Conv1D</code>-style projection weights are transposed when copied into PyTorch <code>Linear</code> layers. This affects the attention QKV and output projections, and both MLP projections. Matching tensor sizes alone is insufficient if the orientation is wrong. <a class="cite" href="#ref-1" aria-label="Reference 1">[1]</a></p>
+        <p class="source-note">A controlled logit comparison uses identical token IDs, position handling, checkpoint weights, and evaluation behavior. This describes the verification principle; the supplied summary does not contain the project’s test code.</p>
+        <div class="study-table-wrap"><table class="study-table evidence-table">
+          <caption>What the available project source establishes</caption>
+          <thead><tr><th scope="col">Area</th><th scope="col">Documented scope</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Model</th><td>124M GPT-2 decoder in PyTorch; masked attention, residuals, layer normalization, tied embeddings.</td></tr>
+            <tr><th scope="row">Correctness</th><td>Official checkpoint loading and reported numerical agreement with Hugging Face logits.</td></tr>
+            <tr><th scope="row">Pipelines</th><td>Autoregressive generation and domain fine-tuning; cross-entropy, AdamW, scheduling, mixed precision.</td></tr>
+            <tr><th scope="row">Experiment detail</th><td>No domain dataset, training budget, loss curve, perplexity, throughput, or benchmark score is supplied.</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="references" class="study-section references-section" aria-labelledby="references-title">
+        <div class="study-section-heading"><span class="section-number">07</span><h2 id="references-title">Sources &amp; attribution</h2></div>
+        <p>The project’s implementation is a reproduction based on Karpathy’s lecture. GPT-2 and the transformer architecture are credited to their original authors. Mathematical diagrams on this page were drawn for this study.</p>
+        <div id="ref-project" class="project-source">
+          <p><strong>[P] Project source.</strong> Indra Kumar, supplied project-summary excerpt, “GPT-2 From Scratch – LLM Systems,” June 2025.</p>
+          <details><summary>Read the supplied summary</summary><blockquote>
+            <p>“Reimplemented the 124M-parameter GPT-2 decoder in PyTorch with masked multi-head attention, residual connections, layer normalization, and tied embeddings; loaded the official checkpoint and verified numerical agreement with Hugging Face logits.”</p>
+            <p>“Built autoregressive generation and domain fine-tuning pipelines using cross-entropy loss, AdamW, learning-rate scheduling, and mixed-precision training.”</p>
+          </blockquote></details>
+        </div>
+        <ol class="reference-list">
+          <li id="ref-1"><span class="reference-number">[1]</span><div>Andrej Karpathy. <a href="https://www.youtube.com/watch?v=l8pRSuU81PU" target="_blank" rel="noopener noreferrer"><em>Let’s reproduce GPT-2 (124M)</em></a> and <a href="https://github.com/karpathy/build-nanogpt" target="_blank" rel="noopener noreferrer">build-nanogpt</a>.<small>Learning reference; <a href="https://github.com/karpathy/build-nanogpt/blob/master/train_gpt2.py" target="_blank" rel="noopener noreferrer">decoder, weight tying, and checkpoint conversion code</a>. Upstream experiments are not presented as this project’s results.</small></div></li>
+          <li id="ref-2"><span class="reference-number">[2]</span><div>OpenAI GPT-2 checkpoint configuration, hosted by the OpenAI community on Hugging Face. <a href="https://huggingface.co/openai-community/gpt2/blob/main/config.json" target="_blank" rel="noopener noreferrer">config.json</a>.<small>Source of the canonical 12-layer, 12-head, 768-width configuration, vocabulary size, and position limit.</small></div></li>
+          <li id="ref-3"><span class="reference-number">[3]</span><div>Alec Radford et al. (2019). <a href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf" target="_blank" rel="noopener noreferrer"><em>Language Models are Unsupervised Multitask Learners</em></a>.<small>GPT-2, autoregressive language modelling, and pre-layer-normalized decoder design.</small></div></li>
+          <li id="ref-4"><span class="reference-number">[4]</span><div>Ashish Vaswani et al. (2017). <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener noreferrer"><em>Attention Is All You Need</em></a>.<small>Scaled dot-product attention, multi-head attention, and causal masking.</small></div></li>
+          <li id="ref-5"><span class="reference-number">[5]</span><div>PyTorch documentation. <a href="https://docs.pytorch.org/docs/2.8/generated/torch.nn.CrossEntropyLoss.html" target="_blank" rel="noopener noreferrer">CrossEntropyLoss</a>.<small>Logit inputs and class-index targets. Documentation version is not a claim about the project’s PyTorch version.</small></div></li>
+          <li id="ref-6"><span class="reference-number">[6]</span><div>PyTorch documentation. <a href="https://docs.pytorch.org/docs/2.8/generated/torch.optim.AdamW.html" target="_blank" rel="noopener noreferrer">AdamW</a>.<small>Decoupled weight-decay optimizer definition.</small></div></li>
+          <li id="ref-7"><span class="reference-number">[7]</span><div>PyTorch documentation. <a href="https://docs.pytorch.org/docs/2.8/amp.html" target="_blank" rel="noopener noreferrer">Automatic mixed precision</a>.<small>Background on operation-dependent precision.</small></div></li>
+        </ol>
+        <p class="design-attribution">Presentation inspiration: Afshine and Shervine Amidi’s <a href="https://stanford.edu/~shervine/teaching/cs-230/cheatsheet-convolutional-neural-networks/" target="_blank" rel="noopener noreferrer">CS 230 CNN cheatsheet</a>, especially its pairing of compact diagrams and formulas. All project diagrams here are original and specific to GPT-2.</p>
+        <div class="study-end"><a href="../projects.html">← Explore all research projects</a><a href="#main">Back to top ↑</a></div>
+      </section>
+    </article>
+  </div>
+</main>
+<footer class="footer"><div class="footer-inner"><p>© 2026 Indra Kumar</p><p><a href="../projects.html">Research</a> · <a href="../index.html#experience">Experience</a> · <a href="../resume.html">Résumé</a> · <a href="mailto:indrak@iisc.ac.in">Contact</a></p></div></footer>
+</body>
+</html>

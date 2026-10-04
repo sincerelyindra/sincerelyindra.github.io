@@ -17,6 +17,7 @@
       name: 'Machine Learning',
       description: 'Applied modelling across structured data, vision, behavioural data, and decision systems.',
       projects: [
+        ['GPT-2 From Scratch – LLM Systems', 'projects/gpt2-from-scratch.html'],
         ['Building-material classification', 'projects/building-classification.html'],
         ['Australian suburb analysis', 'projects/suburb-profile-analysis.html'],
         ['Brain-tumor segmentation', 'projects/medical-image-segmentation.html']
@@ -71,8 +72,9 @@
     },
     {
       name: 'RAG & LLMs',
-      description: 'Retrieval-augmented generation, hybrid search, semantic reranking, evaluation, and QLoRA at OLA R&D.',
+      description: 'GPT-2 decoder implementation and checkpoint verification, alongside retrieval, evaluation, and QLoRA work at OLA R&D.',
       projects: [
+        ['GPT-2 From Scratch – LLM Systems', 'projects/gpt2-from-scratch.html'],
         ['Professional experience', 'resume.html#experience']
       ],
       x: -0.18, y: 0.20, z: -1.18
@@ -368,3 +370,4 @@
     syncAnimation();
   }
 })();
+
