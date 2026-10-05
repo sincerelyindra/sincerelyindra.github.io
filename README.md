@@ -1,14 +1,15 @@
 # Indra Kumar — research and engineering portfolio
 
-Static portfolio for https://sincerelyindra.github.io/, with a research introduction, professional experience, eight project studies, and a printable web résumé. The site uses HTML, CSS, and a small JavaScript file; no build step or third-party frontend dependency is required.
+Static portfolio for https://sincerelyindra.github.io/, with a research introduction, professional experience, eight project studies, and a PDF résumé. The site uses HTML, CSS, and a small JavaScript file; no build step or third-party frontend dependency is required.
 
 ## Content
 
 - `index.html`: introduction, research interests, selected studies, and concise experience at OLA, the Transportation Networks Laboratory at IISc, and Photomath.
-- `resume.html`: full professional experience, academic background, project summaries, and skills. Use **Print / Save as PDF** for the print layout.
+- `resume.html`: redirects to `assets/Indra_Resume.pdf`, the PDF used by all résumé actions.
+- `assets/Indra_Resume.pdf`: an unmodified copy of [the uploaded résumé](https://github.com/sincerelyindra/Indra-Resume/blob/main/Indra_Resume.pdf).
 - `projects.html` and `projects/`: the eight research and implementation project studies, with team attribution, experimental results, limitations, and supporting repository links.
 - `assets/style.css`: shared typography, responsive layouts, and print styles.
-- `assets/site.js`: mobile navigation and the résumé print action.
+- `assets/site.js`: mobile navigation.
 
 ## Preview and deployment
 
@@ -16,13 +17,13 @@ Open `index.html` locally, or serve the repository with a local static server. G
 
 ## Updating the portfolio
 
-Keep dates and role descriptions consistent between the homepage and résumé. Shared navigation appears on every HTML page; update relative links in project detail pages when changing navigation. The current `assets/profile.png` is the GitHub avatar and can be replaced with a preferred portrait.
+Keep dates and role descriptions consistent between the homepage and résumé. To publish an updated résumé, replace `assets/Indra_Resume.pdf` with the latest PDF from `sincerelyindra/Indra-Resume`. Shared navigation appears on every HTML page; update relative links in project detail pages when changing navigation. The current `assets/profile.png` is the GitHub avatar and can be replaced with a preferred portrait.
 
 The About page’s Research projects section includes the rotating research map in `assets/research-map.js` and `assets/research-map.css`. It supports dragging, theme selection, and pause/resume; rotation pauses offscreen and starts paused for reduced-motion preferences. These assets load only on the About page. The underlying project studies, experience, and navigation remain available without JavaScript.
 
 ## Source and attribution
 
-Professional experience is based on the supplied September 2026 résumé image. The homepage summarizes that source; the web résumé retains fuller methods and evaluation detail. It distinguishes the current OLA role from the completed IISc research period.
+Professional experience is based on the supplied September 2026 résumé image. The homepage summarizes that source; the linked PDF résumé is copied without modification from `sincerelyindra/Indra-Resume`. It distinguishes the current OLA role from the completed IISc research period.
 
 Project studies retain the existing report-based results and team attribution. Repository links identify supporting material; earlier report-linked repositories remain available where supplied. Numerical results describe their reported experimental settings, and the medical-imaging study explicitly credits Indra Kumar with the 3D approach.
 
