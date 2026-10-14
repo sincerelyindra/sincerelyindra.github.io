@@ -1,0 +1,31 @@
+{
+  "sourceRepository": "https://github.com/Aditya241097/Path-optimization-for-four-wheeled-robot-using-aerial-image-UNET-Architecture",
+  "sourceCommit": "54c9a547d853de4cc6ea696e4fd1650537703aa7",
+  "sourcePath": "ML Model/RouteGenerator2.h5",
+  "sourceSha256": "9539ddd8cafcac181710fd33b01f1002af07e4db26a8ba761db44cfcb52495d4",
+  "weightSha256": "b8de012918c460dbda9153b9ced64d7c72c689f13f6608a862854c43e090db22",
+  "weightBytes": 8658372,
+  "parameterCount": 2164593,
+  "trainableParameterCount": 2161649,
+  "inputShape": [
+    128,
+    128,
+    3
+  ],
+  "inputConvention": "RGB float32 values in 0..255; no normalization in the supplied JPEG inference path",
+  "dropoutRate": 0.07,
+  "batchNormEpsilon": 0.001,
+  "threshold": 0.5,
+  "probeLayers": [
+    "activation_1",
+    "activation_3",
+    "activation_5",
+    "activation_7",
+    "activation_9",
+    "activation_11",
+    "activation_13",
+    "activation_15",
+    "activation_17",
+    "conv2d_18"
+  ]
+}
